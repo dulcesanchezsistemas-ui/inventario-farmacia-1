@@ -8,8 +8,8 @@ function reducer(state, action) {
   switch (action.type) {
     case "SET":
       return { ventas: action.payload };
-    case "ADD":
-      return { ventas: [...state.ventas, action.payload] };
+    case "ADD_MANY":
+      return { ventas: [...state.ventas, ...action.payload] };
     case "DELETE":
       return {
         ventas: state.ventas.filter((v) => v.id !== action.payload)
@@ -27,8 +27,6 @@ function VentaProducto() {
   const [form, setForm] = useState({
     productoId: "",
     nombreProducto: "",
-    loteId: "",
-    codigoLote: "",
     cantidadVendida: ""
   });
 
@@ -55,10 +53,7 @@ function VentaProducto() {
     if (dataVentas) {
       dispatch({ type: "SET", payload: JSON.parse(dataVentas) });
     } else {
-      dispatch({
-        type: "SET",
-        payload: []
-      });
+      dispatch({ type: "SET", payload: [] });
     }
   }, []);
 
@@ -73,22 +68,6 @@ function VentaProducto() {
 
     return () => clearTimeout(t);
   }, [searchTemp]);
-
-  const lotesDisponibles = useMemo(() => {
-    if (!form.productoId) return [];
-
-    return lotes.filter(
-      (lote) =>
-        String(lote.productoId) === String(form.productoId) &&
-        Number(lote.cantidad) > 0
-    );
-  }, [lotes, form.productoId]);
-
-  const loteSeleccionado = useMemo(() => {
-    if (!form.loteId) return null;
-
-    return lotes.find((l) => String(l.id) === String(form.loteId)) || null;
-  }, [lotes, form.loteId]);
 
   const totalVentas = state.ventas.length;
 
@@ -109,11 +88,9 @@ function VentaProducto() {
       conteo[venta.nombreProducto] += Number(venta.cantidadVendida);
     });
 
-    const nombre = Object.keys(conteo).reduce((a, b) =>
+    return Object.keys(conteo).reduce((a, b) =>
       conteo[a] > conteo[b] ? a : b
     );
-
-    return nombre;
   }, [state.ventas]);
 
   const handleChange = (e) => {
@@ -127,20 +104,7 @@ function VentaProducto() {
       setForm({
         productoId: value,
         nombreProducto: productoSeleccionado ? productoSeleccionado.nombre : "",
-        loteId: "",
-        codigoLote: "",
         cantidadVendida: ""
-      });
-      return;
-    }
-
-    if (name === "loteId") {
-      const lote = lotes.find((l) => String(l.id) === String(value));
-
-      setForm({
-        ...form,
-        loteId: value,
-        codigoLote: lote ? lote.codigoLote : ""
       });
       return;
     }
@@ -155,59 +119,90 @@ function VentaProducto() {
     setForm({
       productoId: "",
       nombreProducto: "",
-      loteId: "",
-      codigoLote: "",
       cantidadVendida: ""
     });
   };
 
+  const obtenerLotesOrdenados = (productoId) => {
+    return lotes
+      .filter(
+        (lote) =>
+          String(lote.productoId) === String(productoId) &&
+          Number(lote.cantidad) > 0
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento)
+      );
+  };
+
   const registrarVenta = () => {
-    if (!form.productoId || !form.loteId || !form.cantidadVendida) {
+    if (!form.productoId || !form.cantidadVendida) {
       alert("Completa todos los campos.");
       return;
     }
 
-    const cantidad = Number(form.cantidadVendida);
+    const cantidadSolicitada = Number(form.cantidadVendida);
 
-    if (cantidad <= 0) {
+    if (cantidadSolicitada <= 0) {
       alert("La cantidad vendida debe ser mayor que cero.");
       return;
     }
 
-    if (!loteSeleccionado) {
-      alert("Debes seleccionar un lote válido.");
+    const lotesDisponibles = obtenerLotesOrdenados(form.productoId);
+
+    if (lotesDisponibles.length === 0) {
+      alert("No hay lotes disponibles para este producto.");
       return;
     }
 
-    if (cantidad > Number(loteSeleccionado.cantidad)) {
-      alert("La cantidad vendida supera la cantidad disponible del lote.");
-      return;
-    }
-
-    const nuevasVentas = [
-      ...state.ventas,
-      {
-        id: Date.now(),
-        productoId: Number(form.productoId),
-        nombreProducto: form.nombreProducto,
-        loteId: Number(form.loteId),
-        codigoLote: form.codigoLote,
-        cantidadVendida: cantidad
-      }
-    ];
-
-    const lotesActualizados = lotes.map((lote) =>
-      String(lote.id) === String(form.loteId)
-        ? {
-            ...lote,
-            cantidad: Number(lote.cantidad) - cantidad
-          }
-        : lote
+    const totalDisponible = lotesDisponibles.reduce(
+      (acc, lote) => acc + Number(lote.cantidad),
+      0
     );
 
+    if (cantidadSolicitada > totalDisponible) {
+      alert(
+        `No hay suficiente existencia. Disponible total: ${totalDisponible}.`
+      );
+      return;
+    }
+
+    let cantidadRestante = cantidadSolicitada;
+    const movimientosVenta = [];
+    const lotesActualizados = [...lotes];
+
+    for (const lote of lotesDisponibles) {
+      if (cantidadRestante <= 0) break;
+
+      const disponible = Number(lote.cantidad);
+      const cantidadTomada =
+        cantidadRestante <= disponible ? cantidadRestante : disponible;
+
+      movimientosVenta.push({
+        id: Date.now() + Math.random(),
+        productoId: Number(form.productoId),
+        nombreProducto: form.nombreProducto,
+        loteId: Number(lote.id),
+        codigoLote: lote.codigoLote,
+        cantidadVendida: cantidadTomada
+      });
+
+      const index = lotesActualizados.findIndex((l) => l.id === lote.id);
+
+      if (index !== -1) {
+        lotesActualizados[index] = {
+          ...lotesActualizados[index],
+          cantidad: Number(lotesActualizados[index].cantidad) - cantidadTomada
+        };
+      }
+
+      cantidadRestante -= cantidadTomada;
+    }
+
     dispatch({
-      type: "SET",
-      payload: nuevasVentas
+      type: "ADD_MANY",
+      payload: movimientosVenta
     });
 
     setLotes(lotesActualizados);
@@ -253,6 +248,14 @@ function VentaProducto() {
     );
   }, [state.ventas, busqueda]);
 
+  const stockDisponibleProducto = useMemo(() => {
+    if (!form.productoId) return 0;
+
+    return lotes
+      .filter((lote) => String(lote.productoId) === String(form.productoId))
+      .reduce((acc, lote) => acc + Number(lote.cantidad), 0);
+  }, [lotes, form.productoId]);
+
   const Card = ({ titulo, valor, color }) => (
     <div
       className={`rounded-2xl p-4 text-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${color}`}
@@ -269,14 +272,14 @@ function VentaProducto() {
           Venta de Producto
         </h1>
         <p className="text-sm text-gray-500 mt-2">
-          Registra ventas seleccionando un producto y el lote desde el cual se
-          descontará la cantidad vendida.
+          Registra ventas de productos. El sistema utilizará automáticamente los
+          lotes con vencimiento más próximo.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <Card
-          titulo="Total de ventas"
+          titulo="Total de movimientos"
           valor={totalVentas}
           color="bg-gray-800"
         />
@@ -308,7 +311,7 @@ function VentaProducto() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col">
                 <label className="text-sm text-gray-600 mb-1 font-medium">
                   Producto
@@ -330,42 +333,6 @@ function VentaProducto() {
 
               <div className="flex flex-col">
                 <label className="text-sm text-gray-600 mb-1 font-medium">
-                  Lote
-                </label>
-                <select
-                  className="border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  name="loteId"
-                  value={form.loteId}
-                  onChange={handleChange}
-                  disabled={!form.productoId}
-                >
-                  <option value="">Selecciona un lote</option>
-                  {lotesDisponibles.map((lote) => (
-                    <option key={lote.id} value={lote.id}>
-                      {lote.codigoLote}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex flex-col">
-                <label className="text-sm text-gray-600 mb-1 font-medium">
-                  Cantidad disponible
-                </label>
-                <input
-                  className="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50 text-gray-500"
-                  value={
-                    loteSeleccionado
-                      ? `Disponible: ${loteSeleccionado.cantidad}`
-                      : ""
-                  }
-                  placeholder="Cantidad disponible"
-                  disabled
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="text-sm text-gray-600 mb-1 font-medium">
                   Cantidad a vender
                 </label>
                 <input
@@ -378,14 +345,18 @@ function VentaProducto() {
                 />
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col md:col-span-2">
                 <label className="text-sm text-gray-600 mb-1 font-medium">
-                  Producto seleccionado
+                  Stock disponible del producto
                 </label>
                 <input
                   className="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50 text-gray-500"
-                  value={form.nombreProducto}
-                  placeholder="Producto seleccionado"
+                  value={
+                    form.productoId
+                      ? `Disponible total: ${stockDisponibleProducto}`
+                      : ""
+                  }
+                  placeholder="Stock disponible"
                   disabled
                 />
               </div>
@@ -417,7 +388,7 @@ function VentaProducto() {
               Historial de ventas
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Consulta las ventas registradas por producto y lote.
+              Cada línea representa el lote utilizado en la venta.
             </p>
           </div>
 
@@ -444,7 +415,7 @@ function VentaProducto() {
                     Producto
                   </th>
                   <th className="text-left p-4 text-sm font-semibold text-gray-600">
-                    Lote
+                    Lote usado
                   </th>
                   <th className="text-left p-4 text-sm font-semibold text-gray-600">
                     Cantidad vendida
