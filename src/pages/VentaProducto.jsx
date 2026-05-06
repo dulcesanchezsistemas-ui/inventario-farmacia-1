@@ -234,3 +234,25 @@ function VentaProducto() {
 }
 
 export default VentaProducto;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
