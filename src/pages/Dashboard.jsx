@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-function Dashboard() {
+function Dashboard({ setVista }) {
   const [productos, setProductos] = useState([]);
   const [lotes, setLotes] = useState([]);
   const [ventas, setVentas] = useState([]);
@@ -10,23 +10,9 @@ function Dashboard() {
     const dataLotes = localStorage.getItem("lotesInventario");
     const dataVentas = localStorage.getItem("ventasProductos");
 
-    if (dataProductos) {
-      setProductos(JSON.parse(dataProductos));
-    } else {
-      setProductos([]);
-    }
-
-    if (dataLotes) {
-      setLotes(JSON.parse(dataLotes));
-    } else {
-      setLotes([]);
-    }
-
-    if (dataVentas) {
-      setVentas(JSON.parse(dataVentas));
-    } else {
-      setVentas([]);
-    }
+    setProductos(dataProductos ? JSON.parse(dataProductos) : []);
+    setLotes(dataLotes ? JSON.parse(dataLotes) : []);
+    setVentas(dataVentas ? JSON.parse(dataVentas) : []);
   }, []);
 
   const obtenerEstado = (fecha) => {
@@ -99,14 +85,13 @@ function Dashboard() {
       if (!conteo[venta.nombreProducto]) {
         conteo[venta.nombreProducto] = 0;
       }
+
       conteo[venta.nombreProducto] += Number(venta.cantidadVendida);
     });
 
-    const nombre = Object.keys(conteo).reduce((a, b) =>
+    return Object.keys(conteo).reduce((a, b) =>
       conteo[a] > conteo[b] ? a : b
     );
-
-    return nombre;
   }, [ventas]);
 
   const Card = ({ titulo, valor, descripcion, icono, clases = "bg-white" }) => (
@@ -124,6 +109,17 @@ function Dashboard() {
     </div>
   );
 
+  const MenuCard = ({ titulo, descripcion, icono, onClick }) => (
+    <button
+      onClick={onClick}
+      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left"
+    >
+      <div className="text-4xl mb-3">{icono}</div>
+      <h3 className="text-xl font-bold text-gray-800">{titulo}</h3>
+      <p className="text-sm text-gray-500 mt-2">{descripcion}</p>
+    </button>
+  );
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -136,6 +132,38 @@ function Dashboard() {
         </p>
       </div>
 
+      {/* Submenús principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <MenuCard
+          titulo="Productos"
+          descripcion="Gestiona el catálogo de productos."
+          icono="💊"
+          onClick={() => setVista("productos")}
+        />
+
+        <MenuCard
+          titulo="Lotes"
+          descripcion="Controla lotes, cantidades y vencimientos."
+          icono="📦"
+          onClick={() => setVista("lotes")}
+        />
+
+        <MenuCard
+          titulo="Ventas"
+          descripcion="Ingresa al punto de venta del sistema."
+          icono="🛒"
+          onClick={() => setVista("ventas")}
+        />
+
+        <MenuCard
+          titulo="Facturas"
+          descripcion="Módulo pendiente de desarrollo."
+          icono="🧾"
+          onClick={() => setVista("facturas")}
+        />
+      </div>
+
+      {/* Estadísticas generales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card
           titulo="Productos"
@@ -166,6 +194,7 @@ function Dashboard() {
         />
       </div>
 
+      {/* Estadísticas de lotes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card
           titulo="Lotes vigentes"

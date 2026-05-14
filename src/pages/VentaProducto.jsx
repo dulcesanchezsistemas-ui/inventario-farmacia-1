@@ -4,237 +4,401 @@ const API_URL = "http://localhost:3000";
 
 function VentaProducto() {
   const [productos, setProductos] = useState([]);
-  const [ventas, setVentas] = useState([]);
-
-  const [form, setForm] = useState({
-    idProducto: "",
-    nombreProducto: "",
-    cantidadVendida: ""
+  const [busqueda, setBusqueda] = useState("");
+  const [carrito, setCarrito] = useState([]);
+  const [productoSeleccionado, setProductoSeleccionado] = useState("");
+  const [cantidad, setCantidad] = useState("");
+  const [cliente, setCliente] = useState({
+    nit: "CF",
+    nombre: "CONSUMIDOR FINAL"
   });
-
-  const cargarProductos = async () => {
-    const res = await fetch(`${API_URL}/productos`);
-    const data = await res.json();
-    setProductos(data);
-  };
+  const [metodoPago, setMetodoPago] = useState("Efectivo");
 
   useEffect(() => {
     cargarProductos();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const cargarProductos = async () => {
+    try {
+      const res = await fetch(`${API_URL}/productos`);
+      const data = await res.json();
+      setProductos(data);
+    } catch (error) {
+      console.error(error);
+      alert("No se pudieron cargar los productos.");
+    }
+  };
 
-    if (name === "idProducto") {
-      const producto = productos.find((p) => p.id === value);
+  const productosFiltrados = useMemo(() => {
+    return productos.filter((p) =>
+      `${p.id} ${p.nombre} ${p.descripcion}`
+        .toLowerCase()
+        .includes(busqueda.toLowerCase())
+    );
+  }, [productos, busqueda]);
 
-      setForm({
-        idProducto: value,
-        nombreProducto: producto ? producto.nombre : "",
-        cantidadVendida: ""
-      });
+  const total = carrito.reduce(
+    (acc, item) => acc + Number(item.precio) * Number(item.cantidad),
+    0
+  );
+
+  const agregarAlCarrito = () => {
+    if (!productoSeleccionado || !cantidad) {
+      alert("Selecciona un producto e ingresa una cantidad.");
       return;
     }
 
-    setForm({ ...form, [name]: value });
+    const producto = productos.find((p) => p.id === productoSeleccionado);
+
+    if (!producto) {
+      alert("Producto no válido.");
+      return;
+    }
+
+    if (Number(cantidad) <= 0) {
+      alert("La cantidad debe ser mayor que cero.");
+      return;
+    }
+
+    const existe = carrito.find((item) => item.id === producto.id);
+
+    if (existe) {
+      setCarrito(
+        carrito.map((item) =>
+          item.id === producto.id
+            ? { ...item, cantidad: Number(item.cantidad) + Number(cantidad) }
+            : item
+        )
+      );
+    } else {
+      setCarrito([
+        ...carrito,
+        {
+          id: producto.id,
+          nombre: producto.nombre,
+          descripcion: producto.descripcion,
+          precio: Number(producto.precio),
+          cantidad: Number(cantidad)
+        }
+      ]);
+    }
+
+    setProductoSeleccionado("");
+    setCantidad("");
   };
 
-  const limpiar = () => {
-    setForm({
-      idProducto: "",
-      nombreProducto: "",
-      cantidadVendida: ""
+  const quitarProducto = (id) => {
+    setCarrito(carrito.filter((item) => item.id !== id));
+  };
+
+  const limpiarVenta = () => {
+    setCarrito([]);
+    setProductoSeleccionado("");
+    setCantidad("");
+    setCliente({
+      nit: "CF",
+      nombre: "CONSUMIDOR FINAL"
     });
+    setMetodoPago("Efectivo");
   };
 
   const registrarVenta = async () => {
-    if (!form.idProducto || !form.cantidadVendida) {
-      alert("Completa todos los campos.");
+    if (carrito.length === 0) {
+      alert("Agrega productos a la venta.");
       return;
     }
 
     try {
-      const res = await fetch(`${API_URL}/lotes/vender`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          idProducto: form.idProducto,
-          cantidadVendida: Number(form.cantidadVendida)
-        })
-      });
+      for (const item of carrito) {
+        const res = await fetch(`${API_URL}/lotes/vender`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            idProducto: item.id,
+            cantidadVendida: Number(item.cantidad)
+          })
+        });
 
-      if (!res.ok) throw new Error("Error al registrar venta");
-
-      const nuevaVenta = {
-        id: Date.now(),
-        nombreProducto: form.nombreProducto,
-        idProducto: form.idProducto,
-        cantidadVendida: Number(form.cantidadVendida)
-      };
-
-      setVentas([...ventas, nuevaVenta]);
-      limpiar();
+        if (!res.ok) {
+          throw new Error(`Error al vender ${item.nombre}`);
+        }
+      }
 
       alert("Venta registrada correctamente.");
+      limpiarVenta();
     } catch (error) {
       console.error(error);
-      alert("Error al registrar venta.");
+      alert("Error al registrar la venta. Revisa el backend.");
     }
   };
 
-  const totalVentas = ventas.length;
-
-  const totalUnidadesVendidas = ventas.reduce(
-    (acc, v) => acc + Number(v.cantidadVendida),
-    0
-  );
-
-  const productoMasVendido = useMemo(() => {
-    if (ventas.length === 0) return "N/A";
-
-    const conteo = {};
-
-    ventas.forEach((v) => {
-      if (!conteo[v.nombreProducto]) conteo[v.nombreProducto] = 0;
-      conteo[v.nombreProducto] += Number(v.cantidadVendida);
-    });
-
-    return Object.keys(conteo).reduce((a, b) =>
-      conteo[a] > conteo[b] ? a : b
-    );
-  }, [ventas]);
-
-  const Card = ({ titulo, valor, color }) => (
-    <div
-      className={`rounded-2xl p-4 text-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${color}`}
-    >
-      <p className="text-sm opacity-90">{titulo}</p>
-      <h3 className="text-2xl font-bold mt-2">{valor}</h3>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Venta de Producto
-        </h1>
-        <p className="text-sm text-gray-500 mt-2">
-          Registra ventas enviando el producto y cantidad al backend. La base de
-          datos seleccionará automáticamente el lote correspondiente.
-        </p>
+      <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-3xl shadow-sm p-8 text-white">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+          <div>
+            <p className="text-sm text-blue-200 font-medium">
+              Módulo de ventas
+            </p>
+            <h1 className="text-3xl font-bold mt-2">Punto de Venta</h1>
+            <p className="text-slate-200 mt-2">
+              Registra ventas de productos. El backend asigna automáticamente el lote correspondiente.
+            </p>
+          </div>
+
+          <div className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4">
+            <p className="text-sm text-slate-300">Total actual</p>
+            <p className="text-3xl font-bold text-green-300">
+              Q{total.toFixed(2)}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        <Card titulo="Ventas" valor={totalVentas} color="bg-gray-800" />
-        <Card
-          titulo="Unidades vendidas"
-          valor={totalUnidadesVendidas}
-          color="bg-blue-600"
-        />
-        <Card
-          titulo="Producto más vendido"
-          valor={productoMasVendido}
-          color="bg-green-600"
-        />
-      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Datos de venta
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Información básica del cliente.
+                </p>
+              </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Registrar venta
-        </h2>
+              <span className="bg-blue-50 text-blue-700 text-sm font-semibold px-4 py-2 rounded-full">
+                Caja activa
+              </span>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            name="idProducto"
-            value={form.idProducto}
-            onChange={handleChange}
-            className="border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Selecciona producto</option>
-            {productos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombre}
-              </option>
-            ))}
-          </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-600 mb-1 font-medium">
+                  NIT
+                </label>
+                <input
+                  value={cliente.nit}
+                  onChange={(e) =>
+                    setCliente({ ...cliente, nit: e.target.value })
+                  }
+                  className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-          <input
-            type="number"
-            name="cantidadVendida"
-            placeholder="Cantidad a vender"
-            value={form.cantidadVendida}
-            onChange={handleChange}
-            className="border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-          />
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-600 mb-1 font-medium">
+                  Cliente
+                </label>
+                <input
+                  value={cliente.nombre}
+                  onChange={(e) =>
+                    setCliente({ ...cliente, nombre: e.target.value })
+                  }
+                  className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Agregar artículos
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Selecciona productos y agrégalos al carrito.
+                </p>
+              </div>
+
+              <input
+                placeholder="Buscar producto..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 xl:min-w-[320px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <select
+                value={productoSeleccionado}
+                onChange={(e) => setProductoSeleccionado(e.target.value)}
+                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecciona producto</option>
+                {productos.map((producto) => (
+                  <option key={producto.id} value={producto.id}>
+                    {producto.nombre}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                placeholder="Cantidad"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <button
+                onClick={agregarAlCarrito}
+                className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-2xl px-5 py-3 font-semibold transition-all shadow-sm"
+              >
+                Agregar al carrito
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
+              {productosFiltrados.slice(0, 6).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setProductoSeleccionado(p.id)}
+                  className="text-left bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-3xl p-5 transition-all hover:shadow-md hover:-translate-y-1"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-gray-800">{p.nombre}</p>
+                      <p className="text-xs text-gray-400 mt-1">{p.id}</p>
+                    </div>
+                    <span className="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full">
+                      Q{Number(p.precio).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-500 mt-3">
+                    {p.descripcion}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-5">
+              Método de pago
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {["Efectivo", "Tarjeta", "Transferencia"].map((metodo) => (
+                <button
+                  key={metodo}
+                  onClick={() => setMetodoPago(metodo)}
+                  className={`rounded-2xl px-5 py-4 border font-semibold transition-all ${
+                    metodoPago === metodo
+                      ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  {metodo}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex gap-3 mt-5">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">
+                Resumen
+              </h2>
+              <p className="text-sm text-gray-500">
+                {carrito.length} artículos
+              </p>
+            </div>
+
+            <button
+              onClick={limpiarVenta}
+              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition-all"
+            >
+              Limpiar
+            </button>
+          </div>
+
+          {carrito.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+              <div className="text-4xl mb-2">🛒</div>
+              <p className="text-gray-500">No hay productos agregados.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {carrito.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        {item.nombre}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.id}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => quitarProducto(item.id)}
+                      className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-xs"
+                    >
+                      X
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between mt-3 text-sm text-gray-600">
+                    <span>Cantidad: {item.cantidad}</span>
+                    <span>Q{item.precio.toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between mt-2 font-bold text-gray-800">
+                    <span>Subtotal</span>
+                    <span>Q{(item.precio * item.cantidad).toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 space-y-3 border-t pt-5">
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>Q{total.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Descuento</span>
+              <span>Q0.00</span>
+            </div>
+
+            <div className="flex justify-between text-2xl font-bold text-green-600">
+              <span>Total</span>
+              <span>Q{total.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="mt-5 bg-gray-50 rounded-2xl p-4">
+            <p className="text-sm text-gray-500">Método de pago</p>
+            <p className="font-bold text-gray-800">{metodoPago}</p>
+          </div>
+
           <button
             onClick={registrarVenta}
-            className="bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white px-5 py-3 rounded-xl font-medium"
+            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-sm"
           >
             Registrar venta
           </button>
-
-          <button
-            onClick={limpiar}
-            className="bg-gray-200 hover:bg-gray-300 active:scale-95 transition-all text-gray-800 px-5 py-3 rounded-xl font-medium"
-          >
-            Limpiar
-          </button>
         </div>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Historial local de ventas
-        </h2>
-
-        {ventas.length === 0 ? (
-          <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-            <p className="text-gray-500">No hay ventas registradas.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-2xl border border-gray-100">
-            <table className="w-full min-w-[700px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">
-                    Producto
-                  </th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">
-                    Código
-                  </th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">
-                    Cantidad vendida
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ventas.map((v) => (
-                  <tr key={v.id} className="border-t hover:bg-gray-50">
-                    <td className="p-4 text-gray-800 font-medium">
-                      {v.nombreProducto}
-                    </td>
-                    <td className="p-4 text-gray-600">{v.idProducto}</td>
-                    <td className="p-4 text-gray-600">{v.cantidadVendida}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 export default VentaProducto;
-
 
 
 
