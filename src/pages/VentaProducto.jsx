@@ -8,15 +8,21 @@ function VentaProducto() {
   const [carrito, setCarrito] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState("");
   const [cantidad, setCantidad] = useState("");
+
   const [cliente, setCliente] = useState({
     nit: "CF",
     nombre: "CONSUMIDOR FINAL"
   });
+
   const [metodoPago, setMetodoPago] = useState("Efectivo");
 
   useEffect(() => {
     cargarProductos();
   }, []);
+
+  const obtenerIdProducto = (producto) => {
+    return producto.idProducto || producto.id;
+  };
 
   const cargarProductos = async () => {
     try {
@@ -31,7 +37,7 @@ function VentaProducto() {
 
   const productosFiltrados = useMemo(() => {
     return productos.filter((p) =>
-      `${p.id} ${p.nombre} ${p.descripcion}`
+      `${obtenerIdProducto(p)} ${p.nombre} ${p.descripcion}`
         .toLowerCase()
         .includes(busqueda.toLowerCase())
     );
@@ -48,7 +54,9 @@ function VentaProducto() {
       return;
     }
 
-    const producto = productos.find((p) => p.id === productoSeleccionado);
+    const producto = productos.find(
+      (p) => obtenerIdProducto(p) === productoSeleccionado
+    );
 
     if (!producto) {
       alert("Producto no válido.");
@@ -60,12 +68,14 @@ function VentaProducto() {
       return;
     }
 
-    const existe = carrito.find((item) => item.id === producto.id);
+    const idProducto = obtenerIdProducto(producto);
+
+    const existe = carrito.find((item) => item.idProducto === idProducto);
 
     if (existe) {
       setCarrito(
         carrito.map((item) =>
-          item.id === producto.id
+          item.idProducto === idProducto
             ? { ...item, cantidad: Number(item.cantidad) + Number(cantidad) }
             : item
         )
@@ -74,7 +84,7 @@ function VentaProducto() {
       setCarrito([
         ...carrito,
         {
-          id: producto.id,
+          idProducto,
           nombre: producto.nombre,
           descripcion: producto.descripcion,
           precio: Number(producto.precio),
@@ -87,8 +97,8 @@ function VentaProducto() {
     setCantidad("");
   };
 
-  const quitarProducto = (id) => {
-    setCarrito(carrito.filter((item) => item.id !== id));
+  const quitarProducto = (idProducto) => {
+    setCarrito(carrito.filter((item) => item.idProducto !== idProducto));
   };
 
   const limpiarVenta = () => {
@@ -116,7 +126,7 @@ function VentaProducto() {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            idProducto: item.id,
+            idProducto: item.idProducto,
             cantidadVendida: Number(item.cantidad)
           })
         });
@@ -144,7 +154,8 @@ function VentaProducto() {
             </p>
             <h1 className="text-3xl font-bold mt-2">Punto de Venta</h1>
             <p className="text-slate-200 mt-2">
-              Registra ventas de productos. El backend asigna automáticamente el lote correspondiente.
+              Registra ventas de productos. El backend asigna automáticamente el
+              lote correspondiente.
             </p>
           </div>
 
@@ -180,6 +191,7 @@ function VentaProducto() {
                 <label className="text-sm text-gray-600 mb-1 font-medium">
                   NIT
                 </label>
+
                 <input
                   value={cliente.nit}
                   onChange={(e) =>
@@ -193,6 +205,7 @@ function VentaProducto() {
                 <label className="text-sm text-gray-600 mb-1 font-medium">
                   Cliente
                 </label>
+
                 <input
                   value={cliente.nombre}
                   onChange={(e) =>
@@ -231,7 +244,10 @@ function VentaProducto() {
               >
                 <option value="">Selecciona producto</option>
                 {productos.map((producto) => (
-                  <option key={producto.id} value={producto.id}>
+                  <option
+                    key={obtenerIdProducto(producto)}
+                    value={obtenerIdProducto(producto)}
+                  >
                     {producto.nombre}
                   </option>
                 ))}
@@ -256,15 +272,18 @@ function VentaProducto() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
               {productosFiltrados.slice(0, 6).map((p) => (
                 <button
-                  key={p.id}
-                  onClick={() => setProductoSeleccionado(p.id)}
+                  key={obtenerIdProducto(p)}
+                  onClick={() => setProductoSeleccionado(obtenerIdProducto(p))}
                   className="text-left bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-3xl p-5 transition-all hover:shadow-md hover:-translate-y-1"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-bold text-gray-800">{p.nombre}</p>
-                      <p className="text-xs text-gray-400 mt-1">{p.id}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {obtenerIdProducto(p)}
+                      </p>
                     </div>
+
                     <span className="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full">
                       Q{Number(p.precio).toFixed(2)}
                     </span>
@@ -304,9 +323,7 @@ function VentaProducto() {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-xl font-bold text-gray-800">
-                Resumen
-              </h2>
+              <h2 className="text-xl font-bold text-gray-800">Resumen</h2>
               <p className="text-sm text-gray-500">
                 {carrito.length} artículos
               </p>
@@ -329,7 +346,7 @@ function VentaProducto() {
             <div className="space-y-3">
               {carrito.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.idProducto}
                   className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -338,12 +355,12 @@ function VentaProducto() {
                         {item.nombre}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        {item.id}
+                        {item.idProducto}
                       </p>
                     </div>
 
                     <button
-                      onClick={() => quitarProducto(item.id)}
+                      onClick={() => quitarProducto(item.idProducto)}
                       className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-xs"
                     >
                       X
@@ -399,8 +416,6 @@ function VentaProducto() {
 }
 
 export default VentaProducto;
-
-
 
 
 

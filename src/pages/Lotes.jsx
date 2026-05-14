@@ -143,7 +143,7 @@ function Lotes() {
           >
             <option value="">Selecciona producto</option>
             {productos.map((p) => (
-              <option key={p.id} value={p.id}>
+              <option key={p.id} value={p.idProducto}>
                 {p.nombre}
               </option>
             ))}
