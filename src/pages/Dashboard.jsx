@@ -30,10 +30,6 @@ function Dashboard({ setVista }) {
     const totalLotes = lotes.length;
     const totalVentas = ventas.length;
 
-    const lotesVigentes = lotes.filter(
-      (l) => obtenerEstado(l.fechaVencimiento) === "vigente"
-    ).length;
-
     const lotesPorVencer = lotes.filter(
       (l) => obtenerEstado(l.fechaVencimiento) === "porVencer"
     ).length;
@@ -42,7 +38,9 @@ function Dashboard({ setVista }) {
       (l) => obtenerEstado(l.fechaVencimiento) === "vencido"
     ).length;
 
-    const stockBajo = lotes.filter((l) => Number(l.cantidad) <= 10).length;
+    const stockBajo = lotes.filter(
+      (l) => Number(l.cantidad) <= 10
+    ).length;
 
     const unidadesVendidas = ventas.reduce(
       (acc, venta) => acc + Number(venta.cantidadVendida),
@@ -53,7 +51,6 @@ function Dashboard({ setVista }) {
       totalProductos,
       totalLotes,
       totalVentas,
-      lotesVigentes,
       lotesPorVencer,
       lotesVencidos,
       stockBajo,
@@ -61,122 +58,147 @@ function Dashboard({ setVista }) {
     };
   }, [productos, lotes, ventas]);
 
-  const alertas = useMemo(() => {
-    return lotes.filter((l) => {
-      const estado = obtenerEstado(l.fechaVencimiento);
-      return (
-        estado === "vencido" ||
-        estado === "porVencer" ||
-        Number(l.cantidad) <= 10
-      );
-    });
-  }, [lotes]);
-
   const ultimosLotes = useMemo(() => {
     return [...lotes].slice(-4).reverse();
   }, [lotes]);
 
-  const productoMasVendido = useMemo(() => {
-    if (ventas.length === 0) return null;
-
-    const conteo = {};
-
-    ventas.forEach((venta) => {
-      if (!conteo[venta.nombreProducto]) {
-        conteo[venta.nombreProducto] = 0;
-      }
-
-      conteo[venta.nombreProducto] += Number(venta.cantidadVendida);
-    });
-
-    return Object.keys(conteo).reduce((a, b) =>
-      conteo[a] > conteo[b] ? a : b
-    );
-  }, [ventas]);
-
-  const Card = ({ titulo, valor, descripcion, icono, clases = "bg-white" }) => (
+  const Card = ({
+    titulo,
+    valor,
+    descripcion,
+    icono,
+    color
+  }) => (
     <div
-      className={`rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${clases}`}
+      className={`rounded-3xl p-6 text-white shadow-sm ${color}`}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-500">{titulo}</p>
-          <h3 className="text-3xl font-bold mt-2 text-gray-800">{valor}</h3>
-          <p className="text-sm text-gray-500 mt-2">{descripcion}</p>
+          <p className="text-sm opacity-80">{titulo}</p>
+
+          <h3 className="text-4xl font-bold mt-3">
+            {valor}
+          </h3>
+
+          <p className="text-sm opacity-80 mt-3">
+            {descripcion}
+          </p>
         </div>
-        <div className="text-3xl">{icono}</div>
+
+        <div className="text-4xl opacity-80">
+          {icono}
+        </div>
       </div>
     </div>
   );
 
-  const MenuCard = ({ titulo, descripcion, icono, onClick }) => (
+  const MenuCard = ({
+    titulo,
+    descripcion,
+    icono,
+    onClick
+  }) => (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left"
+      className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left"
     >
-      <div className="text-4xl mb-3">{icono}</div>
-      <h3 className="text-xl font-bold text-gray-800">{titulo}</h3>
-      <p className="text-sm text-gray-500 mt-2">{descripcion}</p>
+      <div className="text-5xl mb-4">
+        {icono}
+      </div>
+
+      <h3 className="text-2xl font-bold text-gray-800">
+        {titulo}
+      </h3>
+
+      <p className="text-sm text-gray-500 mt-3">
+        {descripcion}
+      </p>
     </button>
   );
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Panel de Control del Sistema
-        </h1>
-        <p className="text-sm text-gray-500 mt-2">
-          Visualiza el resumen general del catálogo, lotes, ventas y alertas
-          importantes del inventario.
-        </p>
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-3xl shadow-sm p-8 text-white">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+          <div>
+            <p className="text-sm text-blue-200 font-medium">
+              Sistema farmacéutico
+            </p>
+
+            <h1 className="text-4xl font-bold mt-2">
+              FarmaSystem Dashboard
+            </h1>
+
+            <p className="text-slate-200 mt-3 max-w-2xl">
+              Controla productos, lotes, ventas y alertas
+              importantes desde un solo lugar.
+            </p>
+          </div>
+
+          <div className="bg-white/10 border border-white/10 rounded-3xl px-6 py-5">
+            <p className="text-sm text-slate-300">
+              Estado del sistema
+            </p>
+
+            <h3 className="text-2xl font-bold mt-2 text-green-300">
+              Operativo
+            </h3>
+
+            <p className="text-sm text-slate-300 mt-2">
+              Todos los módulos funcionando correctamente.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Submenús principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* MENÚ PRINCIPAL */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <MenuCard
           titulo="Productos"
-          descripcion="Gestiona el catálogo de productos."
+          descripcion="Gestiona el catálogo general."
           icono="💊"
           onClick={() => setVista("productos")}
         />
 
         <MenuCard
           titulo="Lotes"
-          descripcion="Controla lotes, cantidades y vencimientos."
+          descripcion="Control de inventario y vencimientos."
           icono="📦"
           onClick={() => setVista("lotes")}
         />
 
         <MenuCard
           titulo="Ventas"
-          descripcion="Ingresa al punto de venta del sistema."
+          descripcion="Punto de venta del sistema."
           icono="🛒"
           onClick={() => setVista("ventas")}
         />
 
         <MenuCard
-          titulo="Facturas"
-          descripcion="Módulo pendiente de desarrollo."
+          titulo="Facturación"
+          descripcion="Módulo administrativo."
           icono="🧾"
           onClick={() => setVista("facturas")}
         />
       </div>
 
-      {/* Estadísticas generales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* ESTADÍSTICAS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <Card
           titulo="Productos"
           valor={estadisticas.totalProductos}
-          descripcion="Productos en el catálogo"
+          descripcion="Productos registrados"
           icono="💊"
+          color="bg-gradient-to-r from-blue-600 to-blue-500"
         />
 
         <Card
           titulo="Lotes"
           valor={estadisticas.totalLotes}
-          descripcion="Lotes registrados"
+          descripcion="Lotes activos"
           icono="📦"
+          color="bg-gradient-to-r from-violet-600 to-violet-500"
         />
 
         <Card
@@ -184,213 +206,121 @@ function Dashboard({ setVista }) {
           valor={estadisticas.totalVentas}
           descripcion="Ventas registradas"
           icono="🛒"
+          color="bg-gradient-to-r from-green-600 to-green-500"
         />
 
         <Card
           titulo="Unidades vendidas"
           valor={estadisticas.unidadesVendidas}
-          descripcion="Cantidad total vendida"
+          descripcion="Productos vendidos"
           icono="📈"
+          color="bg-gradient-to-r from-orange-500 to-orange-400"
         />
       </div>
 
-      {/* Estadísticas de lotes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card
-          titulo="Lotes vigentes"
-          valor={estadisticas.lotesVigentes}
-          descripcion="Lotes en estado correcto"
-          icono="✅"
-        />
-
-        <Card
-          titulo="Por vencer"
-          valor={estadisticas.lotesPorVencer}
-          descripcion="Requieren revisión próxima"
-          icono="⏳"
-        />
-
-        <Card
-          titulo="Vencidos"
-          valor={estadisticas.lotesVencidos}
-          descripcion="Necesitan atención inmediata"
-          icono="🚨"
-        />
-
-        <Card
-          titulo="Stock bajo"
-          valor={estadisticas.stockBajo}
-          descripcion="Lotes con poca cantidad"
-          icono="⚠️"
-        />
-      </div>
-
+      {/* ALERTAS */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Resumen del sistema
-          </h2>
+        <div className="xl:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Alertas del sistema
+              </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4">
-              <p className="text-sm text-gray-500">Estado general</p>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2">
-                {estadisticas.lotesVencidos > 0
-                  ? "Existen lotes vencidos que requieren atención"
-                  : "El inventario se encuentra estable"}
-              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Información importante del inventario.
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4">
-              <p className="text-sm text-gray-500">Prioridad actual</p>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2">
-                {estadisticas.lotesPorVencer > 0
-                  ? "Revisar lotes próximos a vencer"
-                  : "Sin alertas cercanas de vencimiento"}
+            <div className="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-semibold">
+              {estadisticas.lotesVencidos} vencidos
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-3xl bg-yellow-50 border border-yellow-100 p-5">
+              <div className="text-4xl">⏳</div>
+
+              <h3 className="text-3xl font-bold text-yellow-700 mt-4">
+                {estadisticas.lotesPorVencer}
               </h3>
+
+              <p className="text-sm text-yellow-700 mt-2">
+                Lotes próximos a vencer
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4">
-              <p className="text-sm text-gray-500">Control de stock</p>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2">
-                {estadisticas.stockBajo > 0
-                  ? "Hay lotes con cantidad baja"
-                  : "Cantidad en niveles adecuados"}
+            <div className="rounded-3xl bg-red-50 border border-red-100 p-5">
+              <div className="text-4xl">🚨</div>
+
+              <h3 className="text-3xl font-bold text-red-700 mt-4">
+                {estadisticas.lotesVencidos}
               </h3>
+
+              <p className="text-sm text-red-700 mt-2">
+                Lotes vencidos
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4">
-              <p className="text-sm text-gray-500">Producto más vendido</p>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2">
-                {productoMasVendido || "Sin ventas registradas"}
+            <div className="rounded-3xl bg-orange-50 border border-orange-100 p-5">
+              <div className="text-4xl">⚠️</div>
+
+              <h3 className="text-3xl font-bold text-orange-700 mt-4">
+                {estadisticas.stockBajo}
               </h3>
+
+              <p className="text-sm text-orange-700 mt-2">
+                Stock bajo
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Alertas rápidas
+        {/* LOTES RECIENTES */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Últimos lotes
           </h2>
 
-          {alertas.length === 0 ? (
-            <div className="rounded-2xl bg-green-50 border border-green-100 p-4">
-              <p className="text-green-700 font-medium">Todo está en orden.</p>
-              <p className="text-sm text-green-600 mt-1">
-                No hay lotes con alertas por el momento.
+          <p className="text-sm text-gray-500 mt-1 mb-5">
+            Registros recientes del inventario.
+          </p>
+
+          {ultimosLotes.length === 0 ? (
+            <div className="bg-gray-50 rounded-3xl p-8 text-center border border-dashed border-gray-200">
+              <p className="text-gray-500">
+                No hay lotes registrados.
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {alertas.slice(0, 5).map((lote) => {
-                const estado = obtenerEstado(lote.fechaVencimiento);
-                const esStockBajo = Number(lote.cantidad) <= 10;
-
-                return (
-                  <div
-                    key={lote.id}
-                    className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {lote.nombreProducto}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Lote: {lote.codigoLote}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          estado === "vencido"
-                            ? "bg-red-100 text-red-700"
-                            : estado === "porVencer"
-                            ? "bg-orange-100 text-orange-700"
-                            : esStockBajo
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {estado === "vencido"
-                          ? "Vencido"
-                          : estado === "porVencer"
-                          ? "Por vencer"
-                          : esStockBajo
-                          ? "Stock bajo"
-                          : "Vigente"}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-gray-600 mt-2">
-                      Vencimiento: {lote.fechaVencimiento} | Cantidad:{" "}
-                      {lote.cantidad}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Últimos lotes registrados
-        </h2>
-
-        {ultimosLotes.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-            <p className="text-gray-500">No hay lotes registrados todavía.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {ultimosLotes.map((lote) => {
-              const estado = obtenerEstado(lote.fechaVencimiento);
-
-              return (
+            <div className="space-y-4">
+              {ultimosLotes.map((lote) => (
                 <div
                   key={lote.id}
-                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4 hover:shadow-md transition-all duration-300"
+                  className="bg-gray-50 rounded-2xl p-4 border border-gray-100"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">
+                    <h3 className="font-bold text-gray-800">
                       {lote.nombreProducto}
                     </h3>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        estado === "vencido"
-                          ? "bg-red-100 text-red-700"
-                          : estado === "porVencer"
-                          ? "bg-orange-100 text-orange-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {estado === "vencido"
-                        ? "Vencido"
-                        : estado === "porVencer"
-                        ? "Por vencer"
-                        : "Vigente"}
+
+                    <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+                      {lote.codigoLote}
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-500 mt-2">
-                    Lote: {lote.codigoLote}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Ingreso: {lote.fechaIngreso}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Vencimiento: {lote.fechaVencimiento}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 mt-3">
                     Cantidad: {lote.cantidad}
                   </p>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Vence: {lote.fechaVencimiento}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
