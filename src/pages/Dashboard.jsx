@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  Package,
+  Boxes,
+  ShoppingCart,
+  AlertTriangle,
+  ArrowRight,
+  Activity,
+  Receipt,
+  ShieldCheck,
+  Clock3
+} from "lucide-react";
+
 function Dashboard({ setVista }) {
   const [productos, setProductos] = useState([]);
   const [lotes, setLotes] = useState([]);
@@ -15,313 +27,427 @@ function Dashboard({ setVista }) {
     setVentas(dataVentas ? JSON.parse(dataVentas) : []);
   }, []);
 
-  const obtenerEstado = (fecha) => {
-    const hoy = new Date();
-    const vencimiento = new Date(fecha);
-    const diff = (vencimiento - hoy) / (1000 * 60 * 60 * 24);
-
-    if (diff < 0) return "vencido";
-    if (diff < 30) return "porVencer";
-    return "vigente";
-  };
-
   const estadisticas = useMemo(() => {
-    const totalProductos = productos.length;
-    const totalLotes = lotes.length;
-    const totalVentas = ventas.length;
-
-    const lotesPorVencer = lotes.filter(
-      (l) => obtenerEstado(l.fechaVencimiento) === "porVencer"
-    ).length;
-
-    const lotesVencidos = lotes.filter(
-      (l) => obtenerEstado(l.fechaVencimiento) === "vencido"
-    ).length;
-
-    const stockBajo = lotes.filter(
-      (l) => Number(l.cantidad) <= 10
-    ).length;
-
-    const unidadesVendidas = ventas.reduce(
-      (acc, venta) => acc + Number(venta.cantidadVendida),
-      0
-    );
-
     return {
-      totalProductos,
-      totalLotes,
-      totalVentas,
-      lotesPorVencer,
-      lotesVencidos,
-      stockBajo,
-      unidadesVendidas
+      productos: productos.length,
+      lotes: lotes.length,
+      ventas: ventas.length,
+      stockBajo: lotes.filter((l) => Number(l.cantidad) <= 10).length
     };
   }, [productos, lotes, ventas]);
 
-  const ultimosLotes = useMemo(() => {
-    return [...lotes].slice(-4).reverse();
-  }, [lotes]);
-
-  const Card = ({
+  const StatCard = ({
     titulo,
     valor,
-    descripcion,
     icono,
     color
   }) => (
     <div
-      className={`rounded-3xl p-6 text-white shadow-sm ${color}`}
+      className="
+        bg-white
+        rounded-[28px]
+        p-6
+        border
+        border-gray-100
+        shadow-sm
+        hover:shadow-xl
+        transition-all
+        duration-300
+      "
     >
       <div className="flex items-start justify-between">
+
         <div>
-          <p className="text-sm opacity-80">{titulo}</p>
 
-          <h3 className="text-4xl font-bold mt-3">
-            {valor}
-          </h3>
-
-          <p className="text-sm opacity-80 mt-3">
-            {descripcion}
+          <p className="text-sm text-slate-400 font-medium">
+            {titulo}
           </p>
+
+          <h2 className="text-4xl font-bold text-slate-900 mt-4">
+            {valor}
+          </h2>
+
         </div>
 
-        <div className="text-4xl opacity-80">
+        <div
+          className={`
+            w-14
+            h-14
+            rounded-2xl
+            flex
+            items-center
+            justify-center
+            ${color}
+          `}
+        >
           {icono}
         </div>
+
       </div>
     </div>
   );
 
-  const MenuCard = ({
+  const ActionCard = ({
     titulo,
     descripcion,
     icono,
-    onClick
+    onClick,
+    color
   }) => (
     <button
       onClick={onClick}
-      className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all text-left"
+      className="
+        group
+        bg-white
+        rounded-[30px]
+        border
+        border-gray-100
+        p-6
+        text-left
+        hover:shadow-2xl
+        hover:-translate-y-1
+        transition-all
+        duration-300
+      "
     >
-      <div className="text-5xl mb-4">
+
+      <div
+        className={`
+          w-14
+          h-14
+          rounded-2xl
+          flex
+          items-center
+          justify-center
+          ${color}
+        `}
+      >
         {icono}
       </div>
 
-      <h3 className="text-2xl font-bold text-gray-800">
+      <h3 className="text-xl font-semibold text-slate-900 mt-6">
         {titulo}
       </h3>
 
-      <p className="text-sm text-gray-500 mt-3">
+      <p className="text-sm text-slate-400 mt-2 leading-relaxed">
         {descripcion}
       </p>
+
+      <div className="flex items-center gap-2 mt-6 text-violet-600 font-medium text-sm">
+
+        Abrir módulo
+
+        <ArrowRight
+          size={16}
+          className="group-hover:translate-x-1 transition-all"
+        />
+
+      </div>
+
     </button>
   );
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-3xl shadow-sm p-8 text-white">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+    <div className="space-y-8">
+
+      {/* HERO */}
+      <div
+        className="
+          relative
+          overflow-hidden
+          rounded-[38px]
+          bg-gradient-to-r
+          from-violet-600
+          via-blue-600
+          to-cyan-500
+          p-10
+          text-white
+          shadow-2xl
+        "
+      >
+
+        {/* Glow */}
+        <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-white/10 blur-3xl rounded-full" />
+
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-10">
+
+          {/* LEFT */}
           <div>
-            <p className="text-sm text-blue-200 font-medium">
-              Sistema farmacéutico
+
+            <p className="uppercase tracking-[6px] text-sm text-white/70">
+              Smart Pharmacy Dashboard
             </p>
 
-            <h1 className="text-4xl font-bold mt-2">
-              FarmaSystem Dashboard
+            <h1 className="text-6xl font-bold mt-6 tracking-tight">
+              FarmaSystem
             </h1>
 
-            <p className="text-slate-200 mt-3 max-w-2xl">
-              Controla productos, lotes, ventas y alertas
-              importantes desde un solo lugar.
+            <p className="mt-5 text-white/80 max-w-2xl text-lg leading-relaxed">
+              Plataforma moderna para administración farmacéutica,
+              inventario inteligente, ventas y facturación.
             </p>
+
+            {/* STATUS */}
+            <div className="flex items-center gap-4 mt-10">
+
+              <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <ShieldCheck size={24} />
+                </div>
+
+                <div>
+
+                  <p className="text-sm text-white/70">
+                    Estado sistema
+                  </p>
+
+                  <p className="font-semibold text-lg">
+                    Operativo
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Clock3 size={24} />
+                </div>
+
+                <div>
+
+                  <p className="text-sm text-white/70">
+                    Última actividad
+                  </p>
+
+                  <p className="font-semibold text-lg">
+                    Hace 2 min
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
 
-          <div className="bg-white/10 border border-white/10 rounded-3xl px-6 py-5">
-            <p className="text-sm text-slate-300">
-              Estado del sistema
-            </p>
-
-            <h3 className="text-2xl font-bold mt-2 text-green-300">
-              Operativo
-            </h3>
-
-            <p className="text-sm text-slate-300 mt-2">
-              Todos los módulos funcionando correctamente.
-            </p>
-          </div>
         </div>
       </div>
 
-      {/* MENÚ PRINCIPAL */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <MenuCard
+      {/* STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+        <StatCard
           titulo="Productos"
-          descripcion="Gestiona el catálogo general."
-          icono="💊"
-          onClick={() => setVista("productos")}
+          valor={estadisticas.productos}
+          icono={<Package size={26} className="text-blue-700" />}
+          color="bg-blue-100"
         />
 
-        <MenuCard
+        <StatCard
           titulo="Lotes"
-          descripcion="Control de inventario y vencimientos."
-          icono="📦"
-          onClick={() => setVista("lotes")}
+          valor={estadisticas.lotes}
+          icono={<Boxes size={26} className="text-violet-700" />}
+          color="bg-violet-100"
         />
 
-        <MenuCard
+        <StatCard
           titulo="Ventas"
-          descripcion="Punto de venta del sistema."
-          icono="🛒"
-          onClick={() => setVista("ventas")}
+          valor={estadisticas.ventas}
+          icono={<ShoppingCart size={26} className="text-green-700" />}
+          color="bg-green-100"
         />
 
-        <MenuCard
-          titulo="Facturación"
-          descripcion="Módulo administrativo."
-          icono="🧾"
-          onClick={() => setVista("facturas")}
+        <StatCard
+          titulo="Stock bajo"
+          valor={estadisticas.stockBajo}
+          icono={<AlertTriangle size={26} className="text-orange-700" />}
+          color="bg-orange-100"
         />
+
       </div>
 
-      {/* ESTADÍSTICAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <Card
-          titulo="Productos"
-          valor={estadisticas.totalProductos}
-          descripcion="Productos registrados"
-          icono="💊"
-          color="bg-gradient-to-r from-blue-600 to-blue-500"
-        />
+      {/* MODULES */}
+      <div>
 
-        <Card
-          titulo="Lotes"
-          valor={estadisticas.totalLotes}
-          descripcion="Lotes activos"
-          icono="📦"
-          color="bg-gradient-to-r from-violet-600 to-violet-500"
-        />
+        <div className="flex items-center justify-between mb-6">
 
-        <Card
-          titulo="Ventas"
-          valor={estadisticas.totalVentas}
-          descripcion="Ventas registradas"
-          icono="🛒"
-          color="bg-gradient-to-r from-green-600 to-green-500"
-        />
+          <div>
 
-        <Card
-          titulo="Unidades vendidas"
-          valor={estadisticas.unidadesVendidas}
-          descripcion="Productos vendidos"
-          icono="📈"
-          color="bg-gradient-to-r from-orange-500 to-orange-400"
-        />
-      </div>
+            <h2 className="text-3xl font-bold text-slate-900">
+              Módulos
+            </h2>
 
-      {/* ALERTAS */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">
-                Alertas del sistema
-              </h2>
+            <p className="text-slate-400 mt-2">
+              Administración principal del sistema
+            </p>
 
-              <p className="text-sm text-gray-500 mt-1">
-                Información importante del inventario.
-              </p>
-            </div>
-
-            <div className="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-semibold">
-              {estadisticas.lotesVencidos} vencidos
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-3xl bg-yellow-50 border border-yellow-100 p-5">
-              <div className="text-4xl">⏳</div>
+        </div>
 
-              <h3 className="text-3xl font-bold text-yellow-700 mt-4">
-                {estadisticas.lotesPorVencer}
-              </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-              <p className="text-sm text-yellow-700 mt-2">
-                Lotes próximos a vencer
+          <ActionCard
+            titulo="Productos"
+            descripcion="Gestión del catálogo farmacéutico."
+            icono={<Package size={28} className="text-blue-700" />}
+            color="bg-blue-100"
+            onClick={() => setVista("productos")}
+          />
+
+          <ActionCard
+            titulo="Lotes"
+            descripcion="Control de inventario y vencimientos."
+            icono={<Boxes size={28} className="text-violet-700" />}
+            color="bg-violet-100"
+            onClick={() => setVista("lotes")}
+          />
+
+          <ActionCard
+            titulo="Ventas"
+            descripcion="Punto de venta farmacéutico."
+            icono={<ShoppingCart size={28} className="text-green-700" />}
+            color="bg-green-100"
+            onClick={() => setVista("ventas")}
+          />
+
+          <ActionCard
+            titulo="Facturas"
+            descripcion="Facturación y control administrativo."
+            icono={<Receipt size={28} className="text-orange-700" />}
+            color="bg-orange-100"
+            onClick={() => setVista("facturas")}
+          />
+
+        </div>
+      </div>
+
+      {/* LOWER */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        {/* ACTIVITY */}
+        <div className="xl:col-span-2 bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
+
+          <div className="flex items-center justify-between mb-8">
+
+            <div>
+
+              <h2 className="text-2xl font-bold text-slate-900">
+                Actividad reciente
+              </h2>
+
+              <p className="text-sm text-slate-400 mt-2">
+                Últimos movimientos registrados
               </p>
+
             </div>
 
-            <div className="rounded-3xl bg-red-50 border border-red-100 p-5">
-              <div className="text-4xl">🚨</div>
-
-              <h3 className="text-3xl font-bold text-red-700 mt-4">
-                {estadisticas.lotesVencidos}
-              </h3>
-
-              <p className="text-sm text-red-700 mt-2">
-                Lotes vencidos
-              </p>
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+              <Activity size={24} className="text-slate-700" />
             </div>
 
-            <div className="rounded-3xl bg-orange-50 border border-orange-100 p-5">
-              <div className="text-4xl">⚠️</div>
+          </div>
 
-              <h3 className="text-3xl font-bold text-orange-700 mt-4">
+          <div className="space-y-4">
+
+            {[
+              "Nueva venta registrada",
+              "Inventario actualizado",
+              "Factura procesada",
+              "Lote agregado correctamente"
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  bg-slate-50
+                  rounded-2xl
+                  px-5
+                  py-4
+                  hover:bg-slate-100
+                  transition-all
+                "
+              >
+
+                <div className="flex items-center gap-4">
+
+                  <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center">
+                    ✨
+                  </div>
+
+                  <div>
+
+                    <p className="font-medium text-slate-800">
+                      {item}
+                    </p>
+
+                    <p className="text-sm text-slate-400 mt-1">
+                      Hace unos minutos
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <ArrowRight
+                  size={18}
+                  className="text-slate-300"
+                />
+
+              </div>
+            ))}
+
+          </div>
+        </div>
+
+        {/* ALERTS */}
+        <div className="bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
+
+          <h2 className="text-2xl font-bold text-slate-900">
+            Alertas
+          </h2>
+
+          <p className="text-sm text-slate-400 mt-2">
+            Estado general del sistema
+          </p>
+
+          <div className="space-y-5 mt-8">
+
+            <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6">
+
+              <p className="text-sm text-orange-500">
+                Productos con stock bajo
+              </p>
+
+              <h3 className="text-5xl font-bold text-orange-600 mt-4">
                 {estadisticas.stockBajo}
               </h3>
 
-              <p className="text-sm text-orange-700 mt-2">
-                Stock bajo
-              </p>
             </div>
+
+            <div className="bg-blue-50 border border-blue-100 rounded-3xl p-6">
+
+              <p className="text-sm text-blue-500">
+                Productos registrados
+              </p>
+
+              <h3 className="text-5xl font-bold text-blue-600 mt-4">
+                {estadisticas.productos}
+              </h3>
+
+            </div>
+
           </div>
-        </div>
 
-        {/* LOTES RECIENTES */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Últimos lotes
-          </h2>
-
-          <p className="text-sm text-gray-500 mt-1 mb-5">
-            Registros recientes del inventario.
-          </p>
-
-          {ultimosLotes.length === 0 ? (
-            <div className="bg-gray-50 rounded-3xl p-8 text-center border border-dashed border-gray-200">
-              <p className="text-gray-500">
-                No hay lotes registrados.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {ultimosLotes.map((lote) => (
-                <div
-                  key={lote.id}
-                  className="bg-gray-50 rounded-2xl p-4 border border-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-gray-800">
-                      {lote.nombreProducto}
-                    </h3>
-
-                    <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                      {lote.codigoLote}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-500 mt-3">
-                    Cantidad: {lote.cantidad}
-                  </p>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    Vence: {lote.fechaVencimiento}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
+
     </div>
   );
 }

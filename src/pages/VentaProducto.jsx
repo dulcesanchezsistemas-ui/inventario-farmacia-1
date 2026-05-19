@@ -1,82 +1,101 @@
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  ArrowLeft,
+  Search,
+  ShoppingCart,
+  Trash2,
+  CreditCard,
+  Wallet,
+  Landmark,
+  Receipt,
+  Plus
+} from "lucide-react";
+
 const API_URL = "http://localhost:3000";
 
-function VentaProducto() {
+function VentaProducto({ setVista }) {
   const [productos, setProductos] = useState([]);
+
   const [busqueda, setBusqueda] = useState("");
+
   const [carrito, setCarrito] = useState([]);
-  const [productoSeleccionado, setProductoSeleccionado] = useState("");
+
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState("");
+
   const [cantidad, setCantidad] = useState("");
 
   const [cliente, setCliente] = useState({
     nit: "CF",
-    nombre: "CONSUMIDOR FINAL"
+    nombre: "CONSUMIDOR FINAL",
+    direccion: "Ciudad"
   });
 
-  const [metodoPago, setMetodoPago] = useState("Efectivo");
+  const [metodoPago, setMetodoPago] =
+    useState("Efectivo");
 
   useEffect(() => {
     cargarProductos();
   }, []);
 
-  const obtenerIdProducto = (producto) => {
-    return producto.idProducto || producto.id;
-  };
-
   const cargarProductos = async () => {
     try {
       const res = await fetch(`${API_URL}/productos`);
+
       const data = await res.json();
+
       setProductos(data);
     } catch (error) {
       console.error(error);
-      alert("No se pudieron cargar los productos.");
+      alert("Error al cargar productos");
     }
   };
 
   const productosFiltrados = useMemo(() => {
     return productos.filter((p) =>
-      `${obtenerIdProducto(p)} ${p.nombre} ${p.descripcion}`
+      `${p.nombre} ${p.descripcion}`
         .toLowerCase()
         .includes(busqueda.toLowerCase())
     );
   }, [productos, busqueda]);
 
   const total = carrito.reduce(
-    (acc, item) => acc + Number(item.precio) * Number(item.cantidad),
+    (acc, item) =>
+      acc +
+      Number(item.precio) * Number(item.cantidad),
     0
   );
 
   const agregarAlCarrito = () => {
     if (!productoSeleccionado || !cantidad) {
-      alert("Selecciona un producto e ingresa una cantidad.");
+      alert("Selecciona producto y cantidad");
       return;
     }
 
     const producto = productos.find(
-      (p) => obtenerIdProducto(p) === productoSeleccionado
+      (p) =>
+        p.idProducto === productoSeleccionado
     );
 
-    if (!producto) {
-      alert("Producto no válido.");
-      return;
-    }
+    if (!producto) return;
 
-    if (Number(cantidad) <= 0) {
-      alert("La cantidad debe ser mayor que cero.");
-      return;
-    }
-
-    const idProducto = obtenerIdProducto(producto);
-
-    const existe = carrito.find((item) => item.idProducto === idProducto);
+    const existe = carrito.find(
+      (item) =>
+        item.idProducto === producto.idProducto
+    );
 
     if (existe) {
       setCarrito(
         carrito.map((item) =>
-          item.idProducto === idProducto
-            ? { ...item, cantidad: Number(item.cantidad) + Number(cantidad) }
+          item.idProducto ===
+          producto.idProducto
+            ? {
+                ...item,
+                cantidad:
+                  Number(item.cantidad) +
+                  Number(cantidad)
+              }
             : item
         )
       );
@@ -84,7 +103,7 @@ function VentaProducto() {
       setCarrito([
         ...carrito,
         {
-          idProducto,
+          idProducto: producto.idProducto,
           nombre: producto.nombre,
           descripcion: producto.descripcion,
           precio: Number(producto.precio),
@@ -93,333 +112,772 @@ function VentaProducto() {
       ]);
     }
 
-    setProductoSeleccionado("");
     setCantidad("");
+    setProductoSeleccionado("");
   };
 
   const quitarProducto = (idProducto) => {
-    setCarrito(carrito.filter((item) => item.idProducto !== idProducto));
+    setCarrito(
+      carrito.filter(
+        (item) =>
+          item.idProducto !== idProducto
+      )
+    );
   };
 
   const limpiarVenta = () => {
     setCarrito([]);
+
     setProductoSeleccionado("");
+
     setCantidad("");
+
     setCliente({
       nit: "CF",
-      nombre: "CONSUMIDOR FINAL"
+      nombre: "CONSUMIDOR FINAL",
+      direccion: "Ciudad"
     });
+
     setMetodoPago("Efectivo");
   };
 
-  const registrarVenta = async () => {
+  const facturar = async () => {
     if (carrito.length === 0) {
-      alert("Agrega productos a la venta.");
+      alert("Agrega productos");
       return;
     }
 
     try {
-      for (const item of carrito) {
-        const res = await fetch(`${API_URL}/lotes/vender`, {
+      const body = {
+        nombre: cliente.nombre,
+        direccion: cliente.direccion,
+        nit: cliente.nit,
+        total: total,
+        productos: carrito.map((item) => ({
+          idProducto: item.idProducto,
+          cantidad: Number(item.cantidad)
+        }))
+      };
+
+      const res = await fetch(
+        `${API_URL}/facturas`,
+        {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type":
+              "application/json"
           },
-          body: JSON.stringify({
-            idProducto: item.idProducto,
-            cantidadVendida: Number(item.cantidad)
-          })
-        });
-
-        if (!res.ok) {
-          throw new Error(`Error al vender ${item.nombre}`);
+          body: JSON.stringify(body)
         }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Error al facturar"
+        );
       }
 
-      alert("Venta registrada correctamente.");
+      alert("Factura registrada");
+
       limpiarVenta();
     } catch (error) {
       console.error(error);
-      alert("Error al registrar la venta. Revisa el backend.");
+
+      alert("Error al generar factura");
     }
   };
 
+  const MetodoPagoButton = ({
+    titulo,
+    icono
+  }) => (
+    <button
+      onClick={() =>
+        setMetodoPago(titulo)
+      }
+      className={`
+        rounded-2xl
+        border
+        p-4
+        flex
+        items-center
+        gap-4
+        transition-all
+        ${
+          metodoPago === titulo
+            ? "bg-gradient-to-r from-violet-600 to-blue-600 text-white border-transparent shadow-lg"
+            : "bg-white border-gray-100 hover:border-violet-200"
+        }
+      `}
+    >
+
+      <div
+        className={`
+          w-12
+          h-12
+          rounded-2xl
+          flex
+          items-center
+          justify-center
+          ${
+            metodoPago === titulo
+              ? "bg-white/20"
+              : "bg-slate-100"
+          }
+        `}
+      >
+        {icono}
+      </div>
+
+      <div className="text-left">
+
+        <p className="font-semibold">
+          {titulo}
+        </p>
+
+        <p
+          className={`
+            text-sm
+            ${
+              metodoPago === titulo
+                ? "text-white/70"
+                : "text-slate-400"
+            }
+          `}
+        >
+          Método de pago
+        </p>
+
+      </div>
+
+    </button>
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-3xl shadow-sm p-8 text-white">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+    <div className="space-y-8">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <button
+            onClick={() =>
+              setVista("dashboard")
+            }
+            className="
+              w-12
+              h-12
+              rounded-2xl
+              bg-white
+              border
+              border-gray-100
+              shadow-sm
+              flex
+              items-center
+              justify-center
+              hover:shadow-md
+              transition-all
+            "
+          >
+            <ArrowLeft
+              size={20}
+              className="text-slate-700"
+            />
+          </button>
+
           <div>
-            <p className="text-sm text-blue-200 font-medium">
-              Módulo de ventas
+
+            <h1 className="text-4xl font-bold text-slate-900">
+              Facturación
+            </h1>
+
+            <p className="text-slate-400 mt-2">
+              Punto de venta farmacéutico
             </p>
-            <h1 className="text-3xl font-bold mt-2">Punto de Venta</h1>
-            <p className="text-slate-200 mt-2">
-              Registra ventas de productos. El backend asigna automáticamente el
-              lote correspondiente.
-            </p>
+
           </div>
 
-          <div className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4">
-            <p className="text-sm text-slate-300">Total actual</p>
-            <p className="text-3xl font-bold text-green-300">
-              Q{total.toFixed(2)}
-            </p>
+        </div>
+
+        <div className="bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm flex items-center gap-4">
+
+          <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center">
+            <Receipt
+              size={22}
+              className="text-violet-700"
+            />
           </div>
+
+          <div>
+
+            <p className="text-sm text-slate-400">
+              Total actual
+            </p>
+
+            <h3 className="text-2xl font-bold text-slate-900">
+              Q{total.toFixed(2)}
+            </h3>
+
+          </div>
+
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        {/* LEFT */}
         <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-5">
+
+          {/* CLIENTE */}
+          <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm">
+
+            <div className="flex items-center justify-between mb-8">
+
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  Datos de venta
+
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Datos cliente
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Información básica del cliente.
+
+                <p className="text-slate-400 mt-2">
+                  Información de facturación
                 </p>
+
               </div>
 
-              <span className="bg-blue-50 text-blue-700 text-sm font-semibold px-4 py-2 rounded-full">
-                Caja activa
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <label className="text-sm text-gray-600 mb-1 font-medium">
-                  NIT
-                </label>
-
-                <input
-                  value={cliente.nit}
-                  onChange={(e) =>
-                    setCliente({ ...cliente, nit: e.target.value })
-                  }
-                  className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              <div className="w-14 h-14 rounded-3xl bg-blue-100 flex items-center justify-center">
+                <Receipt
+                  size={26}
+                  className="text-blue-700"
                 />
               </div>
 
-              <div className="flex flex-col">
-                <label className="text-sm text-gray-600 mb-1 font-medium">
-                  Cliente
-                </label>
-
-                <input
-                  value={cliente.nombre}
-                  onChange={(e) =>
-                    setCliente({ ...cliente, nombre: e.target.value })
-                  }
-                  className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  Agregar artículos
-                </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Selecciona productos y agrégalos al carrito.
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
               <input
-                placeholder="Buscar producto..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 xl:min-w-[320px]"
+                value={cliente.nit}
+                onChange={(e) =>
+                  setCliente({
+                    ...cliente,
+                    nit: e.target.value
+                  })
+                }
+                placeholder="NIT"
+                className="
+                  h-14
+                  rounded-2xl
+                  border
+                  border-gray-100
+                  bg-slate-50
+                  px-5
+                  outline-none
+                  focus:ring-2
+                  focus:ring-violet-500
+                "
               />
+
+              <input
+                value={cliente.nombre}
+                onChange={(e) =>
+                  setCliente({
+                    ...cliente,
+                    nombre: e.target.value
+                  })
+                }
+                placeholder="Nombre"
+                className="
+                  h-14
+                  rounded-2xl
+                  border
+                  border-gray-100
+                  bg-slate-50
+                  px-5
+                  outline-none
+                  focus:ring-2
+                  focus:ring-violet-500
+                "
+              />
+
+              <input
+                value={cliente.direccion}
+                onChange={(e) =>
+                  setCliente({
+                    ...cliente,
+                    direccion:
+                      e.target.value
+                  })
+                }
+                placeholder="Dirección"
+                className="
+                  h-14
+                  rounded-2xl
+                  border
+                  border-gray-100
+                  bg-slate-50
+                  px-5
+                  outline-none
+                  focus:ring-2
+                  focus:ring-violet-500
+                "
+              />
+
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          </div>
+
+          {/* PRODUCTOS */}
+          <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm">
+
+            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 mb-8">
+
+              <div>
+
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Productos
+                </h2>
+
+                <p className="text-slate-400 mt-2">
+                  Agrega productos a la factura
+                </p>
+
+              </div>
+
+              <div className="relative w-full xl:w-[320px]">
+
+                <Search
+                  size={18}
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-slate-400
+                  "
+                />
+
+                <input
+                  type="text"
+                  placeholder="Buscar producto..."
+                  value={busqueda}
+                  onChange={(e) =>
+                    setBusqueda(
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    h-14
+                    rounded-2xl
+                    border
+                    border-gray-100
+                    bg-slate-50
+                    pl-12
+                    pr-5
+                    outline-none
+                    focus:ring-2
+                    focus:ring-violet-500
+                  "
+                />
+
+              </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
               <select
                 value={productoSeleccionado}
-                onChange={(e) => setProductoSeleccionado(e.target.value)}
-                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) =>
+                  setProductoSeleccionado(
+                    e.target.value
+                  )
+                }
+                className="
+                  h-14
+                  rounded-2xl
+                  border
+                  border-gray-100
+                  bg-slate-50
+                  px-5
+                  outline-none
+                  focus:ring-2
+                  focus:ring-violet-500
+                "
               >
-                <option value="">Selecciona producto</option>
+
+                <option value="">
+                  Seleccionar producto
+                </option>
+
                 {productos.map((producto) => (
                   <option
-                    key={obtenerIdProducto(producto)}
-                    value={obtenerIdProducto(producto)}
+                    key={
+                      producto.idProducto
+                    }
+                    value={
+                      producto.idProducto
+                    }
                   >
                     {producto.nombre}
                   </option>
                 ))}
+
               </select>
 
               <input
                 type="number"
                 placeholder="Cantidad"
                 value={cantidad}
-                onChange={(e) => setCantidad(e.target.value)}
-                className="border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) =>
+                  setCantidad(
+                    e.target.value
+                  )
+                }
+                className="
+                  h-14
+                  rounded-2xl
+                  border
+                  border-gray-100
+                  bg-slate-50
+                  px-5
+                  outline-none
+                  focus:ring-2
+                  focus:ring-violet-500
+                "
               />
 
               <button
-                onClick={agregarAlCarrito}
-                className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-2xl px-5 py-3 font-semibold transition-all shadow-sm"
+                onClick={
+                  agregarAlCarrito
+                }
+                className="
+                  h-14
+                  rounded-2xl
+                  bg-gradient-to-r
+                  from-violet-600
+                  to-blue-600
+                  text-white
+                  font-medium
+                  flex
+                  items-center
+                  justify-center
+                  gap-3
+                  hover:shadow-lg
+                  transition-all
+                "
               >
-                Agregar al carrito
+
+                <Plus size={18} />
+
+                Agregar
+
               </button>
+
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
-              {productosFiltrados.slice(0, 6).map((p) => (
-                <button
-                  key={obtenerIdProducto(p)}
-                  onClick={() => setProductoSeleccionado(obtenerIdProducto(p))}
-                  className="text-left bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-3xl p-5 transition-all hover:shadow-md hover:-translate-y-1"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-bold text-gray-800">{p.nombre}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {obtenerIdProducto(p)}
-                      </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+              {productosFiltrados
+                .slice(0, 6)
+                .map((producto) => (
+                  <button
+                    key={
+                      producto.idProducto
+                    }
+                    onClick={() =>
+                      setProductoSeleccionado(
+                        producto.idProducto
+                      )
+                    }
+                    className="
+                      text-left
+                      bg-slate-50
+                      border
+                      border-gray-100
+                      rounded-3xl
+                      p-5
+                      hover:shadow-lg
+                      hover:-translate-y-1
+                      transition-all
+                    "
+                  >
+
+                    <div className="flex items-center justify-between">
+
+                      <div>
+
+                        <h3 className="font-semibold text-slate-900">
+                          {
+                            producto.nombre
+                          }
+                        </h3>
+
+                        <p className="text-sm text-slate-400 mt-1">
+                          {
+                            producto.idProducto
+                          }
+                        </p>
+
+                      </div>
+
+                      <div className="bg-violet-100 text-violet-700 px-3 py-2 rounded-2xl text-sm font-semibold">
+                        Q
+                        {Number(
+                          producto.precio
+                        ).toFixed(2)}
+                      </div>
+
                     </div>
 
-                    <span className="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full">
-                      Q{Number(p.precio).toFixed(2)}
-                    </span>
-                  </div>
+                    <p className="text-sm text-slate-400 mt-4 leading-relaxed">
+                      {
+                        producto.descripcion
+                      }
+                    </p>
 
-                  <p className="text-sm text-gray-500 mt-3">
-                    {p.descripcion}
-                  </p>
-                </button>
-              ))}
+                  </button>
+                ))}
+
             </div>
+
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-5">
-              Método de pago
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {["Efectivo", "Tarjeta", "Transferencia"].map((metodo) => (
-                <button
-                  key={metodo}
-                  onClick={() => setMetodoPago(metodo)}
-                  className={`rounded-2xl px-5 py-4 border font-semibold transition-all ${
-                    metodoPago === metodo
-                      ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                  }`}
-                >
-                  {metodo}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">Resumen</h2>
-              <p className="text-sm text-gray-500">
-                {carrito.length} artículos
-              </p>
+        {/* RIGHT */}
+        <div className="space-y-6">
+
+          {/* CARRITO */}
+          <div className="bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
+
+            <div className="flex items-center justify-between mb-8">
+
+              <div>
+
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Factura
+                </h2>
+
+                <p className="text-slate-400 mt-2">
+                  {carrito.length} productos
+                </p>
+
+              </div>
+
+              <div className="w-14 h-14 rounded-3xl bg-green-100 flex items-center justify-center">
+                <ShoppingCart
+                  size={24}
+                  className="text-green-700"
+                />
+              </div>
+
+            </div>
+
+            {carrito.length === 0 ? (
+              <div className="bg-slate-50 rounded-3xl border border-dashed border-gray-200 py-16 text-center">
+
+                <ShoppingCart
+                  size={40}
+                  className="mx-auto text-slate-300"
+                />
+
+                <p className="text-slate-400 mt-4">
+                  No hay productos
+                </p>
+
+              </div>
+            ) : (
+              <div className="space-y-4">
+
+                {carrito.map((item) => (
+                  <div
+                    key={
+                      item.idProducto
+                    }
+                    className="
+                      bg-slate-50
+                      rounded-3xl
+                      p-5
+                      border
+                      border-gray-100
+                    "
+                  >
+
+                    <div className="flex items-start justify-between gap-4">
+
+                      <div>
+
+                        <h3 className="font-semibold text-slate-900">
+                          {item.nombre}
+                        </h3>
+
+                        <p className="text-sm text-slate-400 mt-1">
+                          {
+                            item.cantidad
+                          }{" "}
+                          x Q
+                          {item.precio.toFixed(
+                            2
+                          )}
+                        </p>
+
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          quitarProducto(
+                            item.idProducto
+                          )
+                        }
+                        className="
+                          w-10
+                          h-10
+                          rounded-2xl
+                          bg-red-100
+                          text-red-700
+                          flex
+                          items-center
+                          justify-center
+                        "
+                      >
+                        <Trash2
+                          size={16}
+                        />
+                      </button>
+
+                    </div>
+
+                    <div className="flex items-center justify-between mt-5">
+
+                      <p className="text-sm text-slate-400">
+                        Subtotal
+                      </p>
+
+                      <p className="font-bold text-slate-900">
+                        Q
+                        {(
+                          item.precio *
+                          item.cantidad
+                        ).toFixed(2)}
+                      </p>
+
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+            {/* TOTAL */}
+            <div className="border-t border-gray-100 mt-8 pt-6">
+
+              <div className="flex items-center justify-between">
+
+                <p className="text-slate-400">
+                  Total
+                </p>
+
+                <h2 className="text-4xl font-bold text-slate-900">
+                  Q
+                  {total.toFixed(2)}
+                </h2>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* METODO PAGO */}
+          <div className="bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
+
+            <h2 className="text-2xl font-bold text-slate-900">
+              Método pago
+            </h2>
+
+            <p className="text-slate-400 mt-2">
+              Selecciona método
+            </p>
+
+            <div className="space-y-4 mt-8">
+
+              <MetodoPagoButton
+                titulo="Efectivo"
+                icono={
+                  <Wallet size={22} />
+                }
+              />
+
+              <MetodoPagoButton
+                titulo="Tarjeta"
+                icono={
+                  <CreditCard
+                    size={22}
+                  />
+                }
+              />
+
+              <MetodoPagoButton
+                titulo="Transferencia"
+                icono={
+                  <Landmark size={22} />
+                }
+              />
+
             </div>
 
             <button
-              onClick={limpiarVenta}
-              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition-all"
+              onClick={facturar}
+              className="
+                w-full
+                h-16
+                mt-8
+                rounded-3xl
+                bg-gradient-to-r
+                from-violet-600
+                to-blue-600
+                text-white
+                font-semibold
+                text-lg
+                hover:shadow-2xl
+                transition-all
+              "
             >
-              Limpiar
+              Facturar
             </button>
+
+            <button
+              onClick={limpiarVenta}
+              className="
+                w-full
+                h-14
+                mt-4
+                rounded-3xl
+                bg-slate-100
+                text-slate-700
+                font-medium
+                hover:bg-slate-200
+                transition-all
+              "
+            >
+              Limpiar venta
+            </button>
+
           </div>
 
-          {carrito.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-              <div className="text-4xl mb-2">🛒</div>
-              <p className="text-gray-500">No hay productos agregados.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {carrito.map((item) => (
-                <div
-                  key={item.idProducto}
-                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-800">
-                        {item.nombre}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {item.idProducto}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => quitarProducto(item.idProducto)}
-                      className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-xs"
-                    >
-                      X
-                    </button>
-                  </div>
-
-                  <div className="flex justify-between mt-3 text-sm text-gray-600">
-                    <span>Cantidad: {item.cantidad}</span>
-                    <span>Q{item.precio.toFixed(2)}</span>
-                  </div>
-
-                  <div className="flex justify-between mt-2 font-bold text-gray-800">
-                    <span>Subtotal</span>
-                    <span>Q{(item.precio * item.cantidad).toFixed(2)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-6 space-y-3 border-t pt-5">
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Subtotal</span>
-              <span>Q{total.toFixed(2)}</span>
-            </div>
-
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Descuento</span>
-              <span>Q0.00</span>
-            </div>
-
-            <div className="flex justify-between text-2xl font-bold text-green-600">
-              <span>Total</span>
-              <span>Q{total.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="mt-5 bg-gray-50 rounded-2xl p-4">
-            <p className="text-sm text-gray-500">Método de pago</p>
-            <p className="font-bold text-gray-800">{metodoPago}</p>
-          </div>
-
-          <button
-            onClick={registrarVenta}
-            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-sm"
-          >
-            Registrar venta
-          </button>
         </div>
+
       </div>
+
     </div>
   );
 }
 
 export default VentaProducto;
-
-
-
-
 
 
 
