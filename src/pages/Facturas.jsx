@@ -7,7 +7,8 @@ import {
   Ban,
   FileText,
   DollarSign,
-  ShoppingBag
+  Eye,
+  X
 } from "lucide-react";
 
 const API_URL = "http://localhost:3000";
@@ -16,6 +17,12 @@ function Facturas({ setVista }) {
   const [facturas, setFacturas] = useState([]);
 
   const [busqueda, setBusqueda] = useState("");
+
+  const [facturaDetalle, setFacturaDetalle] =
+    useState(null);
+
+  const [mostrarModal, setMostrarModal] =
+    useState(false);
 
   useEffect(() => {
     cargarFacturas();
@@ -34,6 +41,28 @@ function Facturas({ setVista }) {
       console.error(error);
 
       alert("Error al cargar facturas");
+    }
+  };
+
+  const visualizarFactura = async (
+    idFactura
+  ) => {
+    try {
+      const res = await fetch(
+        `${API_URL}/facturas/${idFactura}`
+      );
+
+      const data = await res.json();
+
+      setFacturaDetalle(data);
+
+      setMostrarModal(true);
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Error al visualizar factura"
+      );
     }
   };
 
@@ -397,7 +426,7 @@ function Facturas({ setVista }) {
                 </th>
 
                 <th className="text-center px-6 py-5 text-sm font-semibold text-slate-500">
-                  Acción
+                  Acciones
                 </th>
 
               </tr>
@@ -454,8 +483,37 @@ function Facturas({ setVista }) {
 
                     <td className="px-6 py-5">
 
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-3">
 
+                        {/* VISUALIZAR */}
+                        <button
+                          onClick={() =>
+                            visualizarFactura(
+                              factura.idFactura
+                            )
+                          }
+                          className="
+                            px-5
+                            py-3
+                            rounded-2xl
+                            bg-blue-100
+                            text-blue-700
+                            font-medium
+                            flex
+                            items-center
+                            gap-3
+                            hover:bg-blue-200
+                            transition-all
+                          "
+                        >
+
+                          <Eye size={18} />
+
+                          Visualizar
+
+                        </button>
+
+                        {/* ANULAR */}
                         {factura.estado ===
                         "ANULADA" ? (
                           <button
@@ -518,6 +576,198 @@ function Facturas({ setVista }) {
         </div>
 
       </div>
+
+      {/* MODAL */}
+      {mostrarModal &&
+        facturaDetalle && (
+          <div
+            className="
+              fixed
+              inset-0
+              bg-black/40
+              backdrop-blur-sm
+              flex
+              items-center
+              justify-center
+              z-50
+              p-6
+            "
+          >
+
+            <div
+              className="
+                bg-white
+                rounded-[32px]
+                w-full
+                max-w-3xl
+                shadow-2xl
+                overflow-hidden
+              "
+            >
+
+              {/* HEADER MODAL */}
+              <div
+                className="
+                  bg-gradient-to-r
+                  from-violet-600
+                  to-blue-600
+                  p-8
+                  text-white
+                  flex
+                  items-center
+                  justify-between
+                "
+              >
+
+                <div>
+
+                  <h2 className="text-3xl font-bold">
+                    Factura #
+                    {
+                      facturaDetalle.idFactura
+                    }
+                  </h2>
+
+                  <p className="text-white/70 mt-2">
+                    Visualización de factura
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={() =>
+                    setMostrarModal(false)
+                  }
+                  className="
+                    w-12
+                    h-12
+                    rounded-2xl
+                    bg-white/20
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <X size={22} />
+                </button>
+
+              </div>
+
+              {/* BODY */}
+              <div className="p-8 space-y-8">
+
+                <div className="grid grid-cols-2 gap-6">
+
+                  <div>
+
+                    <p className="text-sm text-slate-400">
+                      Cliente
+                    </p>
+
+                    <h3 className="text-xl font-bold text-slate-900 mt-2">
+                      {
+                        facturaDetalle.nombre
+                      }
+                    </h3>
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-sm text-slate-400">
+                      NIT
+                    </p>
+
+                    <h3 className="text-xl font-bold text-slate-900 mt-2">
+                      {facturaDetalle.nit}
+                    </h3>
+
+                  </div>
+
+                </div>
+
+                {/* PRODUCTOS */}
+                <div>
+
+                  <p className="text-sm text-slate-400 mb-5">
+                    Productos
+                  </p>
+
+                  <div className="space-y-4">
+
+                    {facturaDetalle.productos?.map(
+                      (
+                        producto,
+                        index
+                      ) => (
+                        <div
+                          key={index}
+                          className="
+                            bg-slate-50
+                            rounded-3xl
+                            p-5
+                            flex
+                            items-center
+                            justify-between
+                          "
+                        >
+
+                          <div>
+
+                            <h3 className="font-semibold text-slate-900">
+                              {
+                                producto.nombre
+                              }
+                            </h3>
+
+                            <p className="text-sm text-slate-400 mt-1">
+                              Cantidad:{" "}
+                              {
+                                producto.cantidad
+                              }
+                            </p>
+
+                          </div>
+
+                        </div>
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+                {/* TOTAL */}
+                <div
+                  className="
+                    border-t
+                    border-gray-100
+                    pt-6
+                    flex
+                    items-center
+                    justify-between
+                  "
+                >
+
+                  <p className="text-lg text-slate-400">
+                    Total factura
+                  </p>
+
+                  <h2 className="text-4xl font-bold text-slate-900">
+                    Q
+                    {Number(
+                      facturaDetalle.total
+                    ).toFixed(2)}
+                  </h2>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
 
     </div>
   );

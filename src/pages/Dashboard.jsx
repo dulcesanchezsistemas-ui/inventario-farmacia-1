@@ -17,15 +17,44 @@ function Dashboard({ setVista }) {
   const [lotes, setLotes] = useState([]);
   const [ventas, setVentas] = useState([]);
 
-  useEffect(() => {
-    const dataProductos = localStorage.getItem("productosCatalogo");
-    const dataLotes = localStorage.getItem("lotesInventario");
-    const dataVentas = localStorage.getItem("ventasProductos");
+ useEffect(() => {
+  cargarDashboard();
+}, []);
 
-    setProductos(dataProductos ? JSON.parse(dataProductos) : []);
-    setLotes(dataLotes ? JSON.parse(dataLotes) : []);
-    setVentas(dataVentas ? JSON.parse(dataVentas) : []);
-  }, []);
+const cargarDashboard = async () => {
+  try {
+    const [
+      productosRes,
+      lotesRes,
+      facturasRes
+    ] = await Promise.all([
+      fetch("http://localhost:3000/productos"),
+      fetch("http://localhost:3000/lotes"),
+      fetch("http://localhost:3000/facturas")
+    ]);
+
+    const productosData =
+      await productosRes.json();
+
+    const lotesData =
+      await lotesRes.json();
+
+    const facturasData =
+      await facturasRes.json();
+
+    setProductos(productosData);
+
+    setLotes(lotesData);
+
+    setVentas(facturasData);
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Error al cargar dashboard"
+    );
+  }
+};
 
   const estadisticas = useMemo(() => {
     return {
@@ -179,7 +208,7 @@ function Dashboard({ setVista }) {
             </p>
 
             <h1 className="text-6xl font-bold mt-6 tracking-tight">
-              FarmaSystem
+              DrogueriaRogil
             </h1>
 
             <p className="mt-5 text-white/80 max-w-2xl text-lg leading-relaxed">

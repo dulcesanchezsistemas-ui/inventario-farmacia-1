@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Dashboard from "./pages/Dashboard";
 import Productos from "./pages/Productos";
@@ -18,6 +18,71 @@ import {
 
 function App() {
   const [vista, setVista] = useState("dashboard");
+
+  const [mostrarNotificaciones, setMostrarNotificaciones] =
+    useState(false);
+
+  const [notificaciones, setNotificaciones] =
+    useState([]);
+
+  useEffect(() => {
+    cargarNotificaciones();
+  }, []);
+
+  const cargarNotificaciones = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:3000/lotes"
+      );
+
+      const data = await res.json();
+
+      const hoy = new Date();
+
+      const nuevas = [];
+
+      data.forEach((lote) => {
+        const vencimiento =
+          new Date(
+            lote.fechaVencimiento
+          );
+
+        const diff =
+          (vencimiento - hoy) /
+          (1000 * 60 * 60 * 24);
+
+        // VENCIDOS
+        if (diff < 0) {
+          nuevas.push({
+            tipo: "vencido",
+            mensaje: `Lote ${lote.codigoLote} vencido`
+          });
+        }
+
+        // POR VENCER
+        else if (diff <= 30) {
+          nuevas.push({
+            tipo: "porVencer",
+            mensaje: `Lote ${lote.codigoLote} por vencer`
+          });
+        }
+
+        // STOCK BAJO
+        if (
+          Number(lote.cantidad) <= 10
+        ) {
+          nuevas.push({
+            tipo: "stock",
+            mensaje: `Stock bajo en ${lote.nombreProducto}`
+          });
+        }
+      });
+
+      setNotificaciones(nuevas);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const renderVista = () => {
     switch (vista) {
@@ -115,7 +180,7 @@ function App() {
             </div>
 
             <h1 className="text-3xl font-bold mt-5 tracking-tight">
-              FarmaSystem
+              DrogueriaRogil
             </h1>
 
             <p className="text-sm text-slate-400 mt-2">
@@ -130,7 +195,9 @@ function App() {
             {menus.map((menu) => (
               <button
                 key={menu.nombre}
-                onClick={() => setVista(menu.vista)}
+                onClick={() =>
+                  setVista(menu.vista)
+                }
                 className={`
                   w-full
                   flex
@@ -220,7 +287,7 @@ function App() {
           <div>
 
             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              Bienvenido
+              Bienvenido 👋
             </h1>
 
             <p className="text-slate-400 mt-2">
@@ -229,10 +296,15 @@ function App() {
 
           </div>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 relative">
 
             {/* NOTIFICATIONS */}
             <button
+              onClick={() =>
+                setMostrarNotificaciones(
+                  !mostrarNotificaciones
+                )
+              }
               className="
                 relative
                 w-12
@@ -250,76 +322,91 @@ function App() {
               "
             >
 
-              <Bell size={20} className="text-slate-700" />
-
-              <div
-                className="
-                  absolute
-                  top-2
-                  right-2
-                  w-2
-                  h-2
-                  bg-violet-500
-                  rounded-full
-                "
+              <Bell
+                size={20}
+                className="text-slate-700"
               />
+
+              {notificaciones.length >
+                0 && (
+                <div
+                  className="
+                    absolute
+                    top-2
+                    right-2
+                    w-2
+                    h-2
+                    bg-violet-500
+                    rounded-full
+                  "
+                />
+              )}
 
             </button>
 
-            {/* USER */}
-            <div
-              className="
-                bg-white
-                border
-                border-gray-100
-                rounded-2xl
-                px-5
-                py-3
-                flex
-                items-center
-                gap-4
-                shadow-sm
-                hover:shadow-lg
-                transition-all
-              "
-            >
-
+            {/* DROPDOWN */}
+            {mostrarNotificaciones && (
               <div
                 className="
-                  w-12
-                  h-12
-                  rounded-full
-                  bg-gradient-to-br
-                  from-violet-100
-                  to-blue-100
-                  text-violet-700
-                  flex
-                  items-center
-                  justify-center
-                  font-bold
+                  absolute
+                  top-16
+                  right-0
+                  w-[340px]
+                  bg-white
+                  rounded-3xl
+                  shadow-2xl
+                  border
+                  border-gray-100
+                  p-5
+                  z-50
                 "
               >
-                FS
+
+                <h3 className="text-xl font-bold text-slate-900 mb-5">
+                  Notificaciones
+                </h3>
+
+                {notificaciones.length ===
+                0 ? (
+                  <p className="text-slate-400">
+                    No hay alertas
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+
+                    {notificaciones.map(
+                      (
+                        noti,
+                        index
+                      ) => (
+                        <div
+                          key={index}
+                          className="
+                            bg-slate-50
+                            rounded-2xl
+                            p-4
+                            border
+                            border-gray-100
+                          "
+                        >
+
+                          <p className="text-sm text-slate-700">
+                            {
+                              noti.mensaje
+                            }
+                          </p>
+
+                        </div>
+                      )
+                    )}
+
+                  </div>
+                )}
+
               </div>
+            )}
 
-              <div>
-
-                <p className="font-semibold text-slate-800">
-                  FarmaSystem
-                </p>
-
-                <p className="text-sm text-slate-400">
-                  Control administrativo
-                </p>
-
-              </div>
-
-              <ChevronDown
-                size={18}
-                className="text-slate-400"
-              />
-
-            </div>
+            
 
           </div>
 
