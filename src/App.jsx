@@ -55,7 +55,11 @@ function App() {
         if (diff < 0) {
           nuevas.push({
             tipo: "vencido",
-            mensaje: `Lote ${lote.codigoLote} vencido`
+           mensaje: `Lote ${
+  lote.codigoLote ||
+  lote.idLote ||
+  "Sin código"
+} vencido`
           });
         }
 
@@ -63,7 +67,11 @@ function App() {
         else if (diff <= 30) {
           nuevas.push({
             tipo: "porVencer",
-            mensaje: `Lote ${lote.codigoLote} por vencer`
+            mensaje: `Lote ${
+  lote.codigoLote ||
+  lote.idLote ||
+  "Sin código"
+} por vencer`
           });
         }
 
@@ -73,7 +81,11 @@ function App() {
         ) {
           nuevas.push({
             tipo: "stock",
-            mensaje: `Stock bajo en ${lote.nombreProducto}`
+            mensaje: `Stock bajo en ${
+  lote.nombreProducto ||
+  lote.nombre ||
+  "producto"
+}`
           });
         }
       });

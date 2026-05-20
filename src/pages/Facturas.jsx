@@ -16,7 +16,8 @@ const API_URL = "http://localhost:3000";
 function Facturas({ setVista }) {
   const [facturas, setFacturas] = useState([]);
 
-  const [busqueda, setBusqueda] = useState("");
+  const [busqueda, setBusqueda] =
+    useState("");
 
   const [facturaDetalle, setFacturaDetalle] =
     useState(null);
@@ -40,7 +41,9 @@ function Facturas({ setVista }) {
     } catch (error) {
       console.error(error);
 
-      alert("Error al cargar facturas");
+      alert(
+        "Error al cargar facturas"
+      );
     }
   };
 
@@ -53,6 +56,8 @@ function Facturas({ setVista }) {
       );
 
       const data = await res.json();
+
+      console.log(data);
 
       setFacturaDetalle(data);
 
@@ -102,7 +107,9 @@ function Facturas({ setVista }) {
     } catch (error) {
       console.error(error);
 
-      alert("Error al anular factura");
+      alert(
+        "Error al anular factura"
+      );
     }
   };
 
@@ -110,7 +117,9 @@ function Facturas({ setVista }) {
     return facturas.filter((f) =>
       `${f.idFactura} ${f.nombre} ${f.nit}`
         .toLowerCase()
-        .includes(busqueda.toLowerCase())
+        .includes(
+          busqueda.toLowerCase()
+        )
     );
   }, [facturas, busqueda]);
 
@@ -118,11 +127,13 @@ function Facturas({ setVista }) {
     return {
       totalFacturas: facturas.length,
 
-      totalVentas: facturas.reduce(
-        (acc, item) =>
-          acc + Number(item.total || 0),
-        0
-      ),
+      totalVentas:
+        facturas.reduce(
+          (acc, item) =>
+            acc +
+            Number(item.total || 0),
+          0
+        ),
 
       anuladas: facturas.filter(
         (f) =>
@@ -216,9 +227,32 @@ function Facturas({ setVista }) {
 
         </div>
 
-        <div className="bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm flex items-center gap-4">
+        <div
+          className="
+            bg-white
+            border
+            border-gray-100
+            rounded-2xl
+            px-5
+            py-4
+            shadow-sm
+            flex
+            items-center
+            gap-4
+          "
+        >
 
-          <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center">
+          <div
+            className="
+              w-12
+              h-12
+              rounded-2xl
+              bg-violet-100
+              flex
+              items-center
+              justify-center
+            "
+          >
             <Receipt
               size={22}
               className="text-violet-700"
@@ -240,12 +274,22 @@ function Facturas({ setVista }) {
           </div>
 
         </div>
+
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        <div className="bg-white rounded-[30px] border border-gray-100 p-6 shadow-sm">
+        <div
+          className="
+            bg-white
+            rounded-[30px]
+            border
+            border-gray-100
+            p-6
+            shadow-sm
+          "
+        >
 
           <div className="flex items-center justify-between">
 
@@ -263,7 +307,17 @@ function Facturas({ setVista }) {
 
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+            <div
+              className="
+                w-14
+                h-14
+                rounded-2xl
+                bg-blue-100
+                flex
+                items-center
+                justify-center
+              "
+            >
               <FileText
                 size={26}
                 className="text-blue-700"
@@ -274,7 +328,16 @@ function Facturas({ setVista }) {
 
         </div>
 
-        <div className="bg-white rounded-[30px] border border-gray-100 p-6 shadow-sm">
+        <div
+          className="
+            bg-white
+            rounded-[30px]
+            border
+            border-gray-100
+            p-6
+            shadow-sm
+          "
+        >
 
           <div className="flex items-center justify-between">
 
@@ -293,7 +356,17 @@ function Facturas({ setVista }) {
 
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center">
+            <div
+              className="
+                w-14
+                h-14
+                rounded-2xl
+                bg-green-100
+                flex
+                items-center
+                justify-center
+              "
+            >
               <DollarSign
                 size={26}
                 className="text-green-700"
@@ -304,7 +377,16 @@ function Facturas({ setVista }) {
 
         </div>
 
-        <div className="bg-white rounded-[30px] border border-gray-100 p-6 shadow-sm">
+        <div
+          className="
+            bg-white
+            rounded-[30px]
+            border
+            border-gray-100
+            p-6
+            shadow-sm
+          "
+        >
 
           <div className="flex items-center justify-between">
 
@@ -322,7 +404,17 @@ function Facturas({ setVista }) {
 
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center">
+            <div
+              className="
+                w-14
+                h-14
+                rounded-2xl
+                bg-red-100
+                flex
+                items-center
+                justify-center
+              "
+            >
               <Ban
                 size={26}
                 className="text-red-700"
@@ -336,7 +428,16 @@ function Facturas({ setVista }) {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+      <div
+        className="
+          bg-white
+          rounded-[32px]
+          border
+          border-gray-100
+          shadow-sm
+          overflow-hidden
+        "
+      >
 
         <div className="p-6 border-b border-gray-100">
 
@@ -485,7 +586,6 @@ function Facturas({ setVista }) {
 
                       <div className="flex items-center justify-center gap-3">
 
-                        {/* VISUALIZAR */}
                         <button
                           onClick={() =>
                             visualizarFactura(
@@ -513,7 +613,6 @@ function Facturas({ setVista }) {
 
                         </button>
 
-                        {/* ANULAR */}
                         {factura.estado ===
                         "ANULADA" ? (
                           <button
@@ -577,7 +676,7 @@ function Facturas({ setVista }) {
 
       </div>
 
-      {/* MODAL */}
+      {/* MODAL FACTURA PREMIUM */}
       {mostrarModal &&
         facturaDetalle && (
           <div
@@ -591,27 +690,30 @@ function Facturas({ setVista }) {
               justify-center
               z-50
               p-6
+              overflow-y-auto
             "
           >
 
             <div
               className="
                 bg-white
-                rounded-[32px]
+                rounded-[36px]
                 w-full
-                max-w-3xl
+                max-w-6xl
                 shadow-2xl
                 overflow-hidden
               "
             >
 
-              {/* HEADER MODAL */}
+              {/* HEADER */}
               <div
                 className="
                   bg-gradient-to-r
-                  from-violet-600
-                  to-blue-600
-                  p-8
+                  from-blue-600
+                  via-blue-700
+                  to-violet-600
+                  px-10
+                  py-8
                   text-white
                   flex
                   items-center
@@ -621,14 +723,11 @@ function Facturas({ setVista }) {
 
                 <div>
 
-                  <h2 className="text-3xl font-bold">
-                    Factura #
-                    {
-                      facturaDetalle.idFactura
-                    }
-                  </h2>
+                  <h1 className="text-5xl font-bold">
+                    Factura electrónica
+                  </h1>
 
-                  <p className="text-white/70 mt-2">
+                  <p className="text-white/80 mt-3 text-lg">
                     Visualización de factura
                   </p>
 
@@ -639,126 +738,378 @@ function Facturas({ setVista }) {
                     setMostrarModal(false)
                   }
                   className="
-                    w-12
-                    h-12
+                    w-14
+                    h-14
                     rounded-2xl
-                    bg-white/20
+                    bg-white/10
+                    hover:bg-white/20
+                    transition-all
                     flex
                     items-center
                     justify-center
                   "
                 >
-                  <X size={22} />
+                  <X size={28} />
                 </button>
 
               </div>
 
               {/* BODY */}
-              <div className="p-8 space-y-8">
+              <div className="p-10">
 
-                <div className="grid grid-cols-2 gap-6">
+                {/* TOP INFO */}
+                <div className="grid grid-cols-3 gap-10 mb-10">
 
-                  <div>
+                  {/* LEFT */}
+                  <div className="space-y-6">
 
-                    <p className="text-sm text-slate-400">
-                      Cliente
-                    </p>
+                    <div>
 
-                    <h3 className="text-xl font-bold text-slate-900 mt-2">
-                      {
-                        facturaDetalle.nombre
-                      }
-                    </h3>
+                      <h1 className="text-5xl font-black text-slate-900">
+                        DrogueriaRogil
+                      </h1>
+
+                      <p className="text-slate-500 mt-3 text-lg">
+                        Salud y bienestar para todos
+                      </p>
+
+                    </div>
+
+                    <div className="space-y-4 text-lg">
+
+                      <div className="flex gap-4">
+
+                        <span className="font-bold text-slate-700">
+                          Fecha:
+                        </span>
+
+                        <span className="text-slate-600">
+                          {new Date().toLocaleDateString()}
+                        </span>
+
+                      </div>
+
+                      <div className="flex gap-4">
+
+                        <span className="font-bold text-slate-700">
+                          Cliente:
+                        </span>
+
+                        <span className="text-slate-600">
+                          {
+                            facturaDetalle
+                              .factura
+                              ?.nombre ||
+                              facturaDetalle.nombre ||
+                              "Consumidor Final"
+                          }
+                        </span>
+
+                      </div>
+
+                      <div className="flex gap-4">
+
+                        <span className="font-bold text-slate-700">
+                          NIT:
+                        </span>
+
+                        <span className="text-slate-600">
+                          {
+                            facturaDetalle
+                              .factura?.nit ||
+                              facturaDetalle.nit ||
+                              "CF"
+                          }
+                        </span>
+
+                      </div>
+
+                    </div>
 
                   </div>
 
-                  <div>
+                  {/* CENTER */}
+                  <div className="flex flex-col items-center justify-center">
 
-                    <p className="text-sm text-slate-400">
-                      NIT
+                    <div
+                      className="
+                        w-52
+                        h-52
+                        rounded-3xl
+                        border-2
+                        border-slate-200
+                        flex
+                        items-center
+                        justify-center
+                        text-slate-400
+                        text-center
+                        bg-slate-50
+                      "
+                    >
+
+                      QR Factura
+
+                    </div>
+
+                    <p className="text-slate-400 mt-5">
+                      Verificación electrónica
                     </p>
 
-                    <h3 className="text-xl font-bold text-slate-900 mt-2">
-                      {facturaDetalle.nit}
-                    </h3>
+                  </div>
+
+                  {/* RIGHT */}
+                  <div className="flex justify-end">
+
+                    <div
+                      className="
+                        border
+                        border-violet-200
+                        rounded-3xl
+                        px-8
+                        py-6
+                        text-right
+                        bg-violet-50
+                        h-fit
+                      "
+                    >
+
+                      <p className="text-slate-500 text-lg">
+                        No.
+                      </p>
+
+                      <h2 className="text-4xl font-black text-violet-700 mt-2">
+                        #
+                        {
+                          facturaDetalle
+                            .factura
+                            ?.idFactura ||
+                            facturaDetalle.idFactura
+                        }
+                      </h2>
+
+                      <p className="text-slate-400 mt-4">
+                        Serie A
+                      </p>
+
+                    </div>
 
                   </div>
 
                 </div>
 
-                {/* PRODUCTOS */}
-                <div>
-
-                  <p className="text-sm text-slate-400 mb-5">
-                    Productos
-                  </p>
-
-                  <div className="space-y-4">
-
-                    {facturaDetalle.productos?.map(
-                      (
-                        producto,
-                        index
-                      ) => (
-                        <div
-                          key={index}
-                          className="
-                            bg-slate-50
-                            rounded-3xl
-                            p-5
-                            flex
-                            items-center
-                            justify-between
-                          "
-                        >
-
-                          <div>
-
-                            <h3 className="font-semibold text-slate-900">
-                              {
-                                producto.nombre
-                              }
-                            </h3>
-
-                            <p className="text-sm text-slate-400 mt-1">
-                              Cantidad:{" "}
-                              {
-                                producto.cantidad
-                              }
-                            </p>
-
-                          </div>
-
-                        </div>
-                      )
-                    )}
-
-                  </div>
-
-                </div>
-
-                {/* TOTAL */}
+                {/* TABLE */}
                 <div
                   className="
-                    border-t
-                    border-gray-100
-                    pt-6
-                    flex
-                    items-center
-                    justify-between
+                    border
+                    border-slate-200
+                    rounded-[28px]
+                    overflow-hidden
+                    mb-10
                   "
                 >
 
-                  <p className="text-lg text-slate-400">
-                    Total factura
+                  <table className="w-full">
+
+                    <thead className="bg-slate-100">
+
+                      <tr>
+
+                        <th className="px-6 py-5 text-left text-slate-700 font-bold">
+                          Producto
+                        </th>
+
+                        <th className="px-6 py-5 text-center text-slate-700 font-bold">
+                          Cantidad
+                        </th>
+
+                        <th className="px-6 py-5 text-center text-slate-700 font-bold">
+                          Precio
+                        </th>
+
+                        <th className="px-6 py-5 text-right text-slate-700 font-bold">
+                          Subtotal
+                        </th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      {(
+                        facturaDetalle.detalle ||
+                        facturaDetalle.productos ||
+                        []
+                      ).map(
+                        (
+                          producto,
+                          index
+                        ) => (
+                          <tr
+                            key={index}
+                            className="
+                              border-t
+                              border-slate-100
+                            "
+                          >
+
+                            <td className="px-6 py-6 text-slate-800 font-medium">
+                              {
+                                producto.nombre
+                              }
+                            </td>
+
+                            <td className="px-6 py-6 text-center text-slate-600">
+                              {
+                                producto.cantidad
+                              }
+                            </td>
+
+                            <td className="px-6 py-6 text-center text-slate-600">
+                              Q
+                              {Number(
+                                producto.precio ||
+                                  producto.precioUnitario ||
+                                  0
+                              ).toFixed(2)}
+                            </td>
+
+                            <td className="px-6 py-6 text-right font-bold text-slate-900">
+                              Q
+                              {Number(
+                                producto.subtotal ||
+                                  (
+                                    producto.precio *
+                                    producto.cantidad
+                                  ) ||
+                                  0
+                              ).toFixed(2)}
+                            </td>
+
+                          </tr>
+                        )
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+                {/* FOOTER */}
+                <div className="grid grid-cols-2 gap-10">
+
+                  {/* LEFT */}
+                  <div
+                    className="
+                      border
+                      border-slate-200
+                      rounded-[28px]
+                      p-8
+                    "
+                  >
+
+                    <h3 className="text-2xl font-bold text-violet-700 mb-5">
+                      Observaciones
+                    </h3>
+
+                    <p className="text-slate-500 text-lg leading-relaxed">
+                      Gracias por su preferencia.
+                      DrogueriaRogil agradece su confianza.
+                    </p>
+
+                  </div>
+
+                  {/* RIGHT */}
+                  <div
+                    className="
+                      border
+                      border-slate-200
+                      rounded-[28px]
+                      overflow-hidden
+                    "
+                  >
+
+                    <div className="p-8 space-y-5">
+
+                      <div className="flex items-center justify-between">
+
+                        <p className="text-xl text-slate-500">
+                          Subtotal
+                        </p>
+
+                        <p className="text-xl font-bold text-slate-800">
+                          Q
+                          {Number(
+                            facturaDetalle
+                              .factura
+                              ?.total ||
+                              facturaDetalle.total ||
+                              0
+                          ).toFixed(2)}
+                        </p>
+
+                      </div>
+
+                      <div className="flex items-center justify-between">
+
+                        <p className="text-xl text-slate-500">
+                          Descuento
+                        </p>
+
+                        <p className="text-xl font-bold text-slate-800">
+                          Q0.00
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* TOTAL */}
+                    <div
+                      className="
+                        bg-violet-50
+                        border-t
+                        border-violet-100
+                        px-8
+                        py-7
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
+
+                      <h2 className="text-3xl font-black text-violet-700">
+                        TOTAL A PAGAR
+                      </h2>
+
+                      <h2 className="text-5xl font-black text-violet-700">
+                        Q
+                        {Number(
+                          facturaDetalle
+                            .factura
+                            ?.total ||
+                            facturaDetalle.total ||
+                            0
+                        ).toFixed(2)}
+                      </h2>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* FOOTER TEXT */}
+                <div className="mt-10 flex items-center justify-between">
+
+                  <p className="text-slate-400 text-lg">
+                    Factura generada electrónicamente
                   </p>
 
-                  <h2 className="text-4xl font-bold text-slate-900">
-                    Q
-                    {Number(
-                      facturaDetalle.total
-                    ).toFixed(2)}
-                  </h2>
+                  <p className="text-violet-600 text-xl font-semibold italic">
+                    ¡Gracias por confiar en DrogueriaRogil!
+                  </p>
 
                 </div>
 
