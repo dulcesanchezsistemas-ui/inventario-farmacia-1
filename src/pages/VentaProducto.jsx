@@ -45,7 +45,11 @@ function VentaProducto({ setVista }) {
 
       const data = await res.json();
 
-      setProductos(data);
+setProductos(
+  Array.isArray(data)
+    ? data
+    : data.productos || []
+);
     } catch (error) {
       console.error(error);
       alert("Error al cargar productos");
@@ -73,23 +77,33 @@ function VentaProducto({ setVista }) {
       return;
     }
 
-    const producto = productos.find(
-      (p) =>
-        p.idProducto === productoSeleccionado
-    );
+   const producto = productos.find(
+  (p) =>
+    (
+      p.idProducto ||
+      p.id
+    ) === productoSeleccionado
+);
 
     if (!producto) return;
 
     const existe = carrito.find(
       (item) =>
-        item.idProducto === producto.idProducto
+        item.idProducto ===
+(
+  producto.idProducto ||
+  producto.id
+)
     );
 
     if (existe) {
       setCarrito(
         carrito.map((item) =>
           item.idProducto ===
-          producto.idProducto
+(
+  producto.idProducto ||
+  producto.id
+)
             ? {
                 ...item,
                 cantidad:
@@ -103,7 +117,9 @@ function VentaProducto({ setVista }) {
       setCarrito([
         ...carrito,
         {
-          idProducto: producto.idProducto,
+          idProducto:
+  producto.idProducto ||
+  producto.id,
           nombre: producto.nombre,
           descripcion: producto.descripcion,
           precio: Number(producto.precio),
@@ -514,13 +530,15 @@ function VentaProducto({ setVista }) {
 
                 {productos.map((producto) => (
                   <option
-                    key={
-                      producto.idProducto
-                    }
-                    value={
-                      producto.idProducto
-                    }
-                  >
+  key={
+    producto.idProducto ||
+    producto.id
+  }
+  value={
+    producto.idProducto ||
+    producto.id
+  }
+>
                     {producto.nombre}
                   </option>
                 ))}
@@ -584,14 +602,16 @@ function VentaProducto({ setVista }) {
                 .slice(0, 6)
                 .map((producto) => (
                   <button
-                    key={
-                      producto.idProducto
-                    }
+  key={
+    producto.idProducto ||
+    producto.id
+  }
                     onClick={() =>
-                      setProductoSeleccionado(
-                        producto.idProducto
-                      )
-                    }
+  setProductoSeleccionado(
+    producto.idProducto ||
+    producto.id
+  )
+}
                     className="
                       text-left
                       bg-slate-50
@@ -615,11 +635,12 @@ function VentaProducto({ setVista }) {
                           }
                         </h3>
 
-                        <p className="text-sm text-slate-400 mt-1">
-                          {
-                            producto.idProducto
-                          }
-                        </p>
+                       <p className="text-sm text-slate-400 mt-1">
+  {
+    producto.idProducto ||
+    producto.id
+  }
+</p>
 
                       </div>
 

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   ArrowLeft,
-  Package,
   Plus,
   Search,
   Pencil,
@@ -13,6 +12,7 @@ import {
 const API_URL = "http://localhost:3000";
 
 function Productos({ setVista }) {
+
   const [productos, setProductos] =
     useState([]);
 
@@ -33,20 +33,37 @@ function Productos({ setVista }) {
       precio: ""
     });
 
+  // =========================
+  // CARGAR PRODUCTOS
+  // =========================
   useEffect(() => {
     cargarProductos();
   }, []);
 
   const cargarProductos = async () => {
+
     try {
+
       const res = await fetch(
         `${API_URL}/productos`
       );
 
+      if (!res.ok) {
+        throw new Error(
+          "Error al cargar productos"
+        );
+      }
+
       const data = await res.json();
 
-      setProductos(data);
+      setProductos(
+        Array.isArray(data)
+          ? data
+          : data.productos || []
+      );
+
     } catch (error) {
+
       console.error(error);
 
       alert(
@@ -55,7 +72,11 @@ function Productos({ setVista }) {
     }
   };
 
+  // =========================
+  // NUEVO PRODUCTO
+  // =========================
   const abrirNuevoProducto = () => {
+
     setModoEdicion(false);
 
     setProductoActual({
@@ -68,48 +89,91 @@ function Productos({ setVista }) {
     setMostrarModal(true);
   };
 
+  // =========================
+  // EDITAR PRODUCTO
+  // =========================
   const abrirEditarProducto = (
     producto
   ) => {
+
     setModoEdicion(true);
 
-    setProductoActual(producto);
+    setProductoActual({
+
+      idProducto:
+        producto.idProducto ||
+        producto.id ||
+        "",
+
+      nombre:
+        producto.nombre || "",
+
+      descripcion:
+        producto.descripcion || "",
+
+      precio:
+        producto.precio || ""
+
+    });
 
     setMostrarModal(true);
   };
 
+  // =========================
+  // GUARDAR PRODUCTO
+  // =========================
   const guardarProducto = async (
     e
   ) => {
+
     e.preventDefault();
 
     try {
+
+      if (
+        !productoActual.nombre ||
+        !productoActual.descripcion ||
+        productoActual.precio === ""
+      ) {
+        return alert(
+          "Completa todos los campos"
+        );
+      }
+
+      // =====================
       // EDITAR
+      // =====================
       if (modoEdicion) {
+
         const res = await fetch(
           `${API_URL}/productos/${productoActual.idProducto}`,
           {
             method: "PUT",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
+
             body: JSON.stringify({
+
               nombre:
                 productoActual.nombre,
+
               descripcion:
                 productoActual.descripcion,
-              precio:
-                Number(
-                  productoActual.precio
-                )
+
+              precio: Number(
+                productoActual.precio
+              )
+
             })
           }
         );
 
         if (!res.ok) {
           throw new Error(
-            "Error al actualizar"
+            "Error al actualizar producto"
           );
         }
 
@@ -118,46 +182,81 @@ function Productos({ setVista }) {
         );
       }
 
+      // =====================
       // CREAR
+      // =====================
       else {
+
+        const bodyEnviar = {
+
+          id:
+            productoActual.idProducto,
+
+          nombre:
+            productoActual.nombre,
+
+          descripcion:
+            productoActual.descripcion,
+
+          precio: Number(
+            productoActual.precio
+          )
+
+        };
+
         const res = await fetch(
           `${API_URL}/productos`,
           {
             method: "POST",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
+
             body: JSON.stringify(
-              productoActual
+              bodyEnviar
             )
           }
         );
 
+        const data =
+          await res.json();
+
         if (!res.ok) {
           throw new Error(
-            "Error al crear"
+            data.error ||
+            "Error al crear producto"
           );
         }
 
-        alert("Producto creado");
+        alert(
+          "Producto creado"
+        );
       }
 
       setMostrarModal(false);
 
       cargarProductos();
+
     } catch (error) {
+
       console.error(error);
 
       alert(
+        error.message ||
         "Error al guardar producto"
       );
     }
   };
 
+  // =========================
+  // ELIMINAR PRODUCTO
+  // =========================
   const eliminarProducto = async (
     idProducto
   ) => {
+
     const confirmar = confirm(
       "¿Deseas eliminar este producto?"
     );
@@ -165,6 +264,7 @@ function Productos({ setVista }) {
     if (!confirmar) return;
 
     try {
+
       const res = await fetch(
         `${API_URL}/productos/${idProducto}`,
         {
@@ -174,14 +274,18 @@ function Productos({ setVista }) {
 
       if (!res.ok) {
         throw new Error(
-          "Error al eliminar"
+          "Error al eliminar producto"
         );
       }
 
-      alert("Producto eliminado");
+      alert(
+        "Producto eliminado"
+      );
 
       cargarProductos();
+
     } catch (error) {
+
       console.error(error);
 
       alert(
@@ -190,19 +294,30 @@ function Productos({ setVista }) {
     }
   };
 
+  // =========================
+  // FILTRAR PRODUCTOS
+  // =========================
   const productosFiltrados =
     useMemo(() => {
+
       return productos.filter(
         (producto) =>
-          `${producto.idProducto} ${producto.nombre} ${producto.descripcion}`
+          `${
+            producto.idProducto ||
+            producto.id
+          } ${producto.nombre || ""} ${
+            producto.descripcion || ""
+          }`
             .toLowerCase()
             .includes(
               busqueda.toLowerCase()
             )
       );
+
     }, [productos, busqueda]);
 
   return (
+
     <div className="space-y-8">
 
       {/* HEADER */}
@@ -225,8 +340,6 @@ function Productos({ setVista }) {
               flex
               items-center
               justify-center
-              hover:shadow-md
-              transition-all
             "
           >
             <ArrowLeft
@@ -242,7 +355,7 @@ function Productos({ setVista }) {
             </h1>
 
             <p className="text-slate-400 mt-2">
-              Gestión de productos farmacéuticos
+              Gestión farmacéutica
             </p>
 
           </div>
@@ -266,8 +379,6 @@ function Productos({ setVista }) {
             items-center
             gap-3
             shadow-lg
-            hover:scale-105
-            transition-all
           "
         >
 
@@ -283,15 +394,15 @@ function Productos({ setVista }) {
       <div
         className="
           bg-white
+          rounded-[32px]
           border
           border-gray-100
-          rounded-[32px]
-          shadow-sm
           p-6
+          shadow-sm
         "
       >
 
-        <div className="relative w-full">
+        <div className="relative">
 
           <Search
             size={18}
@@ -332,7 +443,7 @@ function Productos({ setVista }) {
 
       </div>
 
-      {/* TABLE */}
+      {/* TABLA */}
       <div
         className="
           bg-white
@@ -380,40 +491,42 @@ function Productos({ setVista }) {
 
               {productosFiltrados.map(
                 (producto) => (
+
                   <tr
                     key={
-                      producto.idProducto
+                      producto.idProducto ||
+                      producto.id
                     }
                     className="
                       border-t
                       border-gray-100
                       hover:bg-slate-50
-                      transition-all
                     "
                   >
 
                     <td className="px-6 py-6 font-semibold text-slate-700">
                       {
-                        producto.idProducto
+                        producto.idProducto ||
+                        producto.id
                       }
                     </td>
 
                     <td className="px-6 py-6 text-slate-700">
                       {
-                        producto.nombre
+                        producto.nombre || "-"
                       }
                     </td>
 
                     <td className="px-6 py-6 text-slate-500">
                       {
-                        producto.descripcion
+                        producto.descripcion || "-"
                       }
                     </td>
 
                     <td className="px-6 py-6 font-bold text-slate-900">
                       Q
                       {Number(
-                        producto.precio
+                        producto.precio || 0
                       ).toFixed(2)}
                     </td>
 
@@ -421,7 +534,6 @@ function Productos({ setVista }) {
 
                       <div className="flex items-center justify-center gap-3">
 
-                        {/* EDITAR */}
                         <button
                           onClick={() =>
                             abrirEditarProducto(
@@ -437,20 +549,16 @@ function Productos({ setVista }) {
                             flex
                             items-center
                             justify-center
-                            hover:bg-blue-200
-                            transition-all
                           "
                         >
-                          <Pencil
-                            size={18}
-                          />
+                          <Pencil size={18} />
                         </button>
 
-                        {/* ELIMINAR */}
                         <button
                           onClick={() =>
                             eliminarProducto(
-                              producto.idProducto
+                              producto.idProducto ||
+                              producto.id
                             )
                           }
                           className="
@@ -462,13 +570,9 @@ function Productos({ setVista }) {
                             flex
                             items-center
                             justify-center
-                            hover:bg-red-200
-                            transition-all
                           "
                         >
-                          <Trash2
-                            size={18}
-                          />
+                          <Trash2 size={18} />
                         </button>
 
                       </div>
@@ -489,6 +593,7 @@ function Productos({ setVista }) {
 
       {/* MODAL */}
       {mostrarModal && (
+
         <div
           className="
             fixed
@@ -529,19 +634,13 @@ function Productos({ setVista }) {
               "
             >
 
-              <div>
+              <h2 className="text-3xl font-bold">
 
-                <h2 className="text-3xl font-bold">
-                  {modoEdicion
-                    ? "Editar producto"
-                    : "Nuevo producto"}
-                </h2>
+                {modoEdicion
+                  ? "Editar producto"
+                  : "Nuevo producto"}
 
-                <p className="text-white/80 mt-2">
-                  Gestión farmacéutica
-                </p>
-
-              </div>
+              </h2>
 
               <button
                 onClick={() =>
@@ -552,8 +651,6 @@ function Productos({ setVista }) {
                   h-12
                   rounded-2xl
                   bg-white/10
-                  hover:bg-white/20
-                  transition-all
                   flex
                   items-center
                   justify-center
@@ -570,8 +667,8 @@ function Productos({ setVista }) {
               className="p-8 space-y-6"
             >
 
-              {/* CODIGO */}
               {!modoEdicion && (
+
                 <div>
 
                   <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -598,16 +695,12 @@ function Productos({ setVista }) {
                       border
                       border-gray-200
                       px-5
-                      outline-none
-                      focus:ring-2
-                      focus:ring-violet-500
                     "
                   />
 
                 </div>
               )}
 
-              {/* NOMBRE */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -634,15 +727,11 @@ function Productos({ setVista }) {
                     border
                     border-gray-200
                     px-5
-                    outline-none
-                    focus:ring-2
-                    focus:ring-violet-500
                   "
                 />
 
               </div>
 
-              {/* DESCRIPCION */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -651,6 +740,7 @@ function Productos({ setVista }) {
 
                 <textarea
                   required
+                  rows={4}
                   value={
                     productoActual.descripcion
                   }
@@ -667,16 +757,11 @@ function Productos({ setVista }) {
                     border
                     border-gray-200
                     p-5
-                    outline-none
-                    focus:ring-2
-                    focus:ring-violet-500
                   "
-                  rows={4}
                 />
 
               </div>
 
-              {/* PRECIO */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -704,15 +789,11 @@ function Productos({ setVista }) {
                     border
                     border-gray-200
                     px-5
-                    outline-none
-                    focus:ring-2
-                    focus:ring-violet-500
                   "
                 />
 
               </div>
 
-              {/* BUTTONS */}
               <div className="flex justify-end gap-4 pt-4">
 
                 <button
@@ -727,8 +808,6 @@ function Productos({ setVista }) {
                     bg-slate-100
                     text-slate-700
                     font-semibold
-                    hover:bg-slate-200
-                    transition-all
                   "
                 >
                   Cancelar
@@ -746,8 +825,6 @@ function Productos({ setVista }) {
                     text-white
                     font-semibold
                     shadow-lg
-                    hover:scale-105
-                    transition-all
                   "
                 >
                   {modoEdicion

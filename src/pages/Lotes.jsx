@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   ArrowLeft,
-  Boxes,
   Plus,
   Search,
   Pencil,
@@ -13,6 +12,7 @@ import {
 const API_URL = "http://localhost:3000";
 
 function Lotes({ setVista }) {
+
   const [lotes, setLotes] =
     useState([]);
 
@@ -29,25 +29,40 @@ function Lotes({ setVista }) {
     useState({
       idLote: "",
       idProducto: "",
-      cantidad: "",
-      fechaIngreso: "",
-      fechaVencimiento: ""
+      cantidad: ""
     });
 
+  // =========================
+  // CARGAR LOTES
+  // =========================
   useEffect(() => {
     cargarLotes();
   }, []);
 
   const cargarLotes = async () => {
+
     try {
+
       const res = await fetch(
         `${API_URL}/lotes`
       );
 
+      if (!res.ok) {
+        throw new Error(
+          "Error al cargar lotes"
+        );
+      }
+
       const data = await res.json();
 
-      setLotes(data);
+      setLotes(
+        Array.isArray(data)
+          ? data
+          : data.lotes || []
+      );
+
     } catch (error) {
+
       console.error(error);
 
       alert(
@@ -56,50 +71,92 @@ function Lotes({ setVista }) {
     }
   };
 
+  // =========================
+  // NUEVO LOTE
+  // =========================
   const abrirNuevoLote = () => {
+
     setModoEdicion(false);
 
     setLoteActual({
       idLote: "",
       idProducto: "",
-      cantidad: "",
-      fechaIngreso: "",
-      fechaVencimiento: ""
+      cantidad: ""
     });
 
     setMostrarModal(true);
   };
 
+  // =========================
+  // EDITAR LOTE
+  // =========================
   const abrirEditarLote = (
     lote
   ) => {
+
     setModoEdicion(true);
 
-    setLoteActual(lote);
+    setLoteActual({
+
+      idLote:
+        lote.idLote || "",
+
+      idProducto:
+        lote.idProducto || "",
+
+      cantidad:
+        lote.cantidad || ""
+
+    });
 
     setMostrarModal(true);
   };
 
-  const guardarLote = async (e) => {
+  // =========================
+  // GUARDAR LOTE
+  // =========================
+  const guardarLote = async (
+    e
+  ) => {
+
     e.preventDefault();
 
     try {
+
+      if (
+        !loteActual.idLote ||
+        !loteActual.idProducto ||
+        loteActual.cantidad === ""
+      ) {
+        return alert(
+          "Completa todos los campos"
+        );
+      }
+
+      // =====================
       // EDITAR
+      // =====================
       if (modoEdicion) {
+
         const res = await fetch(
           `${API_URL}/lotes/${loteActual.idLote}`,
           {
             method: "PUT",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
+
             body: JSON.stringify({
+
               idLote:
                 loteActual.idLote,
+
               cantidad: Number(
                 loteActual.cantidad
               )
+
             })
           }
         );
@@ -115,19 +172,34 @@ function Lotes({ setVista }) {
         );
       }
 
+      // =====================
       // CREAR
+      // =====================
       else {
+
         const res = await fetch(
           `${API_URL}/lotes`,
           {
             method: "POST",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
-            body: JSON.stringify(
-              loteActual
-            )
+
+            body: JSON.stringify({
+
+              idLote:
+                loteActual.idLote,
+
+              idProducto:
+                loteActual.idProducto,
+
+              cantidad: Number(
+                loteActual.cantidad
+              )
+
+            })
           }
         );
 
@@ -137,24 +209,33 @@ function Lotes({ setVista }) {
           );
         }
 
-        alert("Lote creado");
+        alert(
+          "Lote creado"
+        );
       }
 
       setMostrarModal(false);
 
       cargarLotes();
+
     } catch (error) {
+
       console.error(error);
 
       alert(
+        error.message ||
         "Error al guardar lote"
       );
     }
   };
 
+  // =========================
+  // ELIMINAR LOTE
+  // =========================
   const eliminarLote = async (
     idLote
   ) => {
+
     const confirmar = confirm(
       "¿Deseas eliminar este lote?"
     );
@@ -162,6 +243,7 @@ function Lotes({ setVista }) {
     if (!confirmar) return;
 
     try {
+
       const res = await fetch(
         `${API_URL}/lotes/${idLote}`,
         {
@@ -175,10 +257,14 @@ function Lotes({ setVista }) {
         );
       }
 
-      alert("Lote eliminado");
+      alert(
+        "Lote eliminado"
+      );
 
       cargarLotes();
+
     } catch (error) {
+
       console.error(error);
 
       alert(
@@ -187,32 +273,27 @@ function Lotes({ setVista }) {
     }
   };
 
+  // =========================
+  // FILTRAR LOTES
+  // =========================
   const lotesFiltrados =
     useMemo(() => {
+
       return lotes.filter(
         (lote) =>
-          `${lote.idLote} ${lote.idProducto}`
+          `${lote.idLote || ""} ${
+            lote.idProducto || ""
+          }`
             .toLowerCase()
             .includes(
               busqueda.toLowerCase()
             )
       );
+
     }, [lotes, busqueda]);
 
-  const obtenerEstado = (
-    fecha
-  ) => {
-    const hoy = new Date();
-
-    const vencimiento =
-      new Date(fecha);
-
-    return vencimiento < hoy
-      ? "Vencido"
-      : "Vigente";
-  };
-
   return (
+
     <div className="space-y-8">
 
       {/* HEADER */}
@@ -235,8 +316,6 @@ function Lotes({ setVista }) {
               flex
               items-center
               justify-center
-              hover:shadow-md
-              transition-all
             "
           >
             <ArrowLeft
@@ -248,11 +327,11 @@ function Lotes({ setVista }) {
           <div>
 
             <h1 className="text-4xl font-bold text-slate-900">
-              Inventario
+              Lotes
             </h1>
 
             <p className="text-slate-400 mt-2">
-              Control general de lotes registrados.
+              Gestión de inventario
             </p>
 
           </div>
@@ -260,7 +339,9 @@ function Lotes({ setVista }) {
         </div>
 
         <button
-          onClick={abrirNuevoLote}
+          onClick={
+            abrirNuevoLote
+          }
           className="
             px-6
             h-14
@@ -274,8 +355,6 @@ function Lotes({ setVista }) {
             items-center
             gap-3
             shadow-lg
-            hover:scale-105
-            transition-all
           "
         >
 
@@ -291,15 +370,15 @@ function Lotes({ setVista }) {
       <div
         className="
           bg-white
+          rounded-[32px]
           border
           border-gray-100
-          rounded-[32px]
-          shadow-sm
           p-6
+          shadow-sm
         "
       >
 
-        <div className="relative w-full">
+        <div className="relative">
 
           <Search
             size={18}
@@ -340,7 +419,7 @@ function Lotes({ setVista }) {
 
       </div>
 
-      {/* TABLE */}
+      {/* TABLA */}
       <div
         className="
           bg-white
@@ -361,7 +440,7 @@ function Lotes({ setVista }) {
               <tr>
 
                 <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Lote
+                  ID Lote
                 </th>
 
                 <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
@@ -370,18 +449,6 @@ function Lotes({ setVista }) {
 
                 <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
                   Cantidad
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Ingreso
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Vencimiento
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Estado
                 </th>
 
                 <th className="px-6 py-5 text-center text-sm font-semibold text-slate-500">
@@ -396,85 +463,34 @@ function Lotes({ setVista }) {
 
               {lotesFiltrados.map(
                 (lote) => (
+
                   <tr
-                    key={lote.idLote}
+                    key={
+                      lote.idLote
+                    }
                     className="
                       border-t
                       border-gray-100
                       hover:bg-slate-50
-                      transition-all
                     "
                   >
 
-                    {/* ID LOTE */}
                     <td className="px-6 py-6 font-semibold text-slate-700">
-                      {
-                        lote.codigoLote ||
-                        lote.idLote
-                      }
+                      {lote.idLote}
                     </td>
 
-                    {/* PRODUCTO */}
                     <td className="px-6 py-6 text-slate-700">
-                      {
-                        lote.nombreProducto ||
-                        lote.nombre ||
-                        lote.idProducto
-                      }
+                      {lote.idProducto}
                     </td>
 
-                    {/* CANTIDAD */}
-                    <td className="px-6 py-6 text-slate-700">
+                    <td className="px-6 py-6 font-bold text-slate-900">
                       {lote.cantidad}
                     </td>
 
-                    {/* INGRESO */}
-                    <td className="px-6 py-6 text-slate-500">
-                      {
-                        lote.fechaIngreso
-                      }
-                    </td>
-
-                    {/* VENCIMIENTO */}
-                    <td className="px-6 py-6 text-slate-500">
-                      {
-                        lote.fechaVencimiento
-                      }
-                    </td>
-
-                    {/* ESTADO */}
-                    <td className="px-6 py-6">
-
-                      <span
-                        className={`
-                          px-4
-                          py-2
-                          rounded-2xl
-                          text-sm
-                          font-medium
-                          ${
-                            obtenerEstado(
-                              lote.fechaVencimiento
-                            ) ===
-                            "Vencido"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-green-100 text-green-700"
-                          }
-                        `}
-                      >
-                        {obtenerEstado(
-                          lote.fechaVencimiento
-                        )}
-                      </span>
-
-                    </td>
-
-                    {/* ACCIONES */}
                     <td className="px-6 py-6">
 
                       <div className="flex items-center justify-center gap-3">
 
-                        {/* EDITAR */}
                         <button
                           onClick={() =>
                             abrirEditarLote(
@@ -490,16 +506,11 @@ function Lotes({ setVista }) {
                             flex
                             items-center
                             justify-center
-                            hover:bg-blue-200
-                            transition-all
                           "
                         >
-                          <Pencil
-                            size={18}
-                          />
+                          <Pencil size={18} />
                         </button>
 
-                        {/* ELIMINAR */}
                         <button
                           onClick={() =>
                             eliminarLote(
@@ -515,13 +526,9 @@ function Lotes({ setVista }) {
                             flex
                             items-center
                             justify-center
-                            hover:bg-red-200
-                            transition-all
                           "
                         >
-                          <Trash2
-                            size={18}
-                          />
+                          <Trash2 size={18} />
                         </button>
 
                       </div>
@@ -542,6 +549,7 @@ function Lotes({ setVista }) {
 
       {/* MODAL */}
       {mostrarModal && (
+
         <div
           className="
             fixed
@@ -567,7 +575,6 @@ function Lotes({ setVista }) {
             "
           >
 
-            {/* HEADER */}
             <div
               className="
                 bg-gradient-to-r
@@ -582,19 +589,13 @@ function Lotes({ setVista }) {
               "
             >
 
-              <div>
+              <h2 className="text-3xl font-bold">
 
-                <h2 className="text-3xl font-bold">
-                  {modoEdicion
-                    ? "Editar lote"
-                    : "Nuevo lote"}
-                </h2>
+                {modoEdicion
+                  ? "Editar lote"
+                  : "Nuevo lote"}
 
-                <p className="text-white/80 mt-2">
-                  Gestión de inventario
-                </p>
-
-              </div>
+              </h2>
 
               <button
                 onClick={() =>
@@ -605,8 +606,6 @@ function Lotes({ setVista }) {
                   h-12
                   rounded-2xl
                   bg-white/10
-                  hover:bg-white/20
-                  transition-all
                   flex
                   items-center
                   justify-center
@@ -623,45 +622,40 @@ function Lotes({ setVista }) {
               className="p-8 space-y-6"
             >
 
-              {/* ID LOTE */}
+              <div>
+
+                <label className="block text-sm font-semibold text-slate-600 mb-3">
+                  ID Lote
+                </label>
+
+                <input
+                  type="text"
+                  required
+                  disabled={modoEdicion}
+                  value={
+                    loteActual.idLote
+                  }
+                  onChange={(e) =>
+                    setLoteActual({
+                      ...loteActual,
+                      idLote:
+                        e.target.value
+                    })
+                  }
+                  className="
+                    w-full
+                    h-14
+                    rounded-2xl
+                    border
+                    border-gray-200
+                    px-5
+                  "
+                />
+
+              </div>
+
               {!modoEdicion && (
-                <div>
 
-                  <label className="block text-sm font-semibold text-slate-600 mb-3">
-                    ID Lote
-                  </label>
-
-                  <input
-                    type="text"
-                    required
-                    value={
-                      loteActual.idLote
-                    }
-                    onChange={(e) =>
-                      setLoteActual({
-                        ...loteActual,
-                        idLote:
-                          e.target.value
-                      })
-                    }
-                    className="
-                      w-full
-                      h-14
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      px-5
-                      outline-none
-                      focus:ring-2
-                      focus:ring-violet-500
-                    "
-                  />
-
-                </div>
-              )}
-
-              {/* PRODUCTO */}
-              {!modoEdicion && (
                 <div>
 
                   <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -688,16 +682,12 @@ function Lotes({ setVista }) {
                       border
                       border-gray-200
                       px-5
-                      outline-none
-                      focus:ring-2
-                      focus:ring-violet-500
                     "
                   />
 
                 </div>
               )}
 
-              {/* CANTIDAD */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-600 mb-3">
@@ -724,89 +714,11 @@ function Lotes({ setVista }) {
                     border
                     border-gray-200
                     px-5
-                    outline-none
-                    focus:ring-2
-                    focus:ring-violet-500
                   "
                 />
 
               </div>
 
-              {/* FECHA INGRESO */}
-              {!modoEdicion && (
-                <div>
-
-                  <label className="block text-sm font-semibold text-slate-600 mb-3">
-                    Fecha ingreso
-                  </label>
-
-                  <input
-                    type="date"
-                    required
-                    value={
-                      loteActual.fechaIngreso
-                    }
-                    onChange={(e) =>
-                      setLoteActual({
-                        ...loteActual,
-                        fechaIngreso:
-                          e.target.value
-                      })
-                    }
-                    className="
-                      w-full
-                      h-14
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      px-5
-                      outline-none
-                      focus:ring-2
-                      focus:ring-violet-500
-                    "
-                  />
-
-                </div>
-              )}
-
-              {/* FECHA VENCIMIENTO */}
-              {!modoEdicion && (
-                <div>
-
-                  <label className="block text-sm font-semibold text-slate-600 mb-3">
-                    Fecha vencimiento
-                  </label>
-
-                  <input
-                    type="date"
-                    required
-                    value={
-                      loteActual.fechaVencimiento
-                    }
-                    onChange={(e) =>
-                      setLoteActual({
-                        ...loteActual,
-                        fechaVencimiento:
-                          e.target.value
-                      })
-                    }
-                    className="
-                      w-full
-                      h-14
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      px-5
-                      outline-none
-                      focus:ring-2
-                      focus:ring-violet-500
-                    "
-                  />
-
-                </div>
-              )}
-
-              {/* BUTTONS */}
               <div className="flex justify-end gap-4 pt-4">
 
                 <button
@@ -821,8 +733,6 @@ function Lotes({ setVista }) {
                     bg-slate-100
                     text-slate-700
                     font-semibold
-                    hover:bg-slate-200
-                    transition-all
                   "
                 >
                   Cancelar
@@ -840,8 +750,6 @@ function Lotes({ setVista }) {
                     text-white
                     font-semibold
                     shadow-lg
-                    hover:scale-105
-                    transition-all
                   "
                 >
                   {modoEdicion

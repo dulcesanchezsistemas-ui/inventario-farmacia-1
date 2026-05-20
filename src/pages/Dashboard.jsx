@@ -1,480 +1,411 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Package,
   Boxes,
   ShoppingCart,
-  AlertTriangle,
-  ArrowRight,
-  Activity,
-  Receipt,
-  ShieldCheck,
-  Clock3
+  Receipt
 } from "lucide-react";
 
+const API_URL = "http://localhost:3000";
+
 function Dashboard({ setVista }) {
-  const [productos, setProductos] = useState([]);
-  const [lotes, setLotes] = useState([]);
-  const [ventas, setVentas] = useState([]);
 
- useEffect(() => {
-  cargarDashboard();
-}, []);
+  const [productos, setProductos] =
+    useState([]);
 
-const cargarDashboard = async () => {
-  try {
-    const [
-      productosRes,
-      lotesRes,
-      facturasRes
-    ] = await Promise.all([
-      fetch("http://localhost:3000/productos"),
-      fetch("http://localhost:3000/lotes"),
-      fetch("http://localhost:3000/facturas")
-    ]);
+  const [lotes, setLotes] =
+    useState([]);
 
-    const productosData =
-      await productosRes.json();
+  const [facturas, setFacturas] =
+    useState([]);
 
-    const lotesData =
-      await lotesRes.json();
+  // =========================
+  // CARGAR DATOS
+  // =========================
+  useEffect(() => {
 
-    const facturasData =
-      await facturasRes.json();
+    cargarProductos();
+    cargarLotes();
+    cargarFacturas();
 
-    setProductos(productosData);
+  }, []);
 
-    setLotes(lotesData);
+  // =========================
+  // PRODUCTOS
+  // =========================
+  const cargarProductos = async () => {
 
-    setVentas(facturasData);
-  } catch (error) {
-    console.error(error);
+    try {
 
-    alert(
-      "Error al cargar dashboard"
-    );
-  }
-};
+      const res = await fetch(
+        `${API_URL}/productos`
+      );
 
-  const estadisticas = useMemo(() => {
-    return {
-      productos: productos.length,
-      lotes: lotes.length,
-      ventas: ventas.length,
-      stockBajo: lotes.filter((l) => Number(l.cantidad) <= 10).length
-    };
-  }, [productos, lotes, ventas]);
+      if (!res.ok) {
+        throw new Error(
+          "Error al cargar productos"
+        );
+      }
 
-  const StatCard = ({
-    titulo,
-    valor,
-    icono,
-    color
-  }) => (
-    <div
-      className="
-        bg-white
-        rounded-[28px]
-        p-6
-        border
-        border-gray-100
-        shadow-sm
-        hover:shadow-xl
-        transition-all
-        duration-300
-      "
-    >
-      <div className="flex items-start justify-between">
+      const data = await res.json();
 
-        <div>
+      setProductos(
+        Array.isArray(data)
+          ? data
+          : data.productos || []
+      );
 
-          <p className="text-sm text-slate-400 font-medium">
-            {titulo}
-          </p>
+    } catch (error) {
 
-          <h2 className="text-4xl font-bold text-slate-900 mt-4">
-            {valor}
-          </h2>
+      console.error(error);
 
-        </div>
+      setProductos([]);
+    }
+  };
 
-        <div
-          className={`
-            w-14
-            h-14
-            rounded-2xl
-            flex
-            items-center
-            justify-center
-            ${color}
-          `}
-        >
-          {icono}
-        </div>
+  // =========================
+  // LOTES
+  // =========================
+  const cargarLotes = async () => {
 
-      </div>
-    </div>
-  );
+    try {
 
-  const ActionCard = ({
-    titulo,
-    descripcion,
-    icono,
-    onClick,
-    color
-  }) => (
-    <button
-      onClick={onClick}
-      className="
-        group
-        bg-white
-        rounded-[30px]
-        border
-        border-gray-100
-        p-6
-        text-left
-        hover:shadow-2xl
-        hover:-translate-y-1
-        transition-all
-        duration-300
-      "
-    >
+      const res = await fetch(
+        `${API_URL}/lotes`
+      );
 
-      <div
-        className={`
-          w-14
-          h-14
-          rounded-2xl
-          flex
-          items-center
-          justify-center
-          ${color}
-        `}
-      >
-        {icono}
-      </div>
+      if (!res.ok) {
+        throw new Error(
+          "Error al cargar lotes"
+        );
+      }
 
-      <h3 className="text-xl font-semibold text-slate-900 mt-6">
-        {titulo}
-      </h3>
+      const data = await res.json();
 
-      <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-        {descripcion}
-      </p>
+      setLotes(
+        Array.isArray(data)
+          ? data
+          : data.lotes || []
+      );
 
-      <div className="flex items-center gap-2 mt-6 text-violet-600 font-medium text-sm">
+    } catch (error) {
 
-        Abrir módulo
+      console.error(error);
 
-        <ArrowRight
-          size={16}
-          className="group-hover:translate-x-1 transition-all"
-        />
+      setLotes([]);
+    }
+  };
 
-      </div>
+  // =========================
+  // FACTURAS
+  // =========================
+  const cargarFacturas = async () => {
 
-    </button>
-  );
+    try {
+
+      const res = await fetch(
+        `${API_URL}/facturas`
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Error al cargar facturas"
+        );
+      }
+
+      const data = await res.json();
+
+      setFacturas(
+        Array.isArray(data)
+          ? data
+          : data.facturas || []
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      setFacturas([]);
+    }
+  };
+
+  // =========================
+  // TARJETAS
+  // =========================
+  const tarjetas = [
+
+    {
+      titulo: "Productos",
+      total: productos.length,
+      icono: <Package size={28} />,
+      color:
+        "from-violet-600 to-purple-600",
+      vista: "productos"
+    },
+
+    {
+      titulo: "Lotes",
+      total: lotes.length,
+      icono: <Boxes size={28} />,
+      color:
+        "from-blue-600 to-cyan-600",
+      vista: "lotes"
+    },
+
+    {
+      titulo: "Ventas",
+      total: facturas.length,
+      icono:
+        <ShoppingCart size={28} />,
+      color:
+        "from-emerald-600 to-green-600",
+      vista: "ventas"
+    },
+
+    {
+      titulo: "Facturas",
+      total: facturas.length,
+      icono:
+        <Receipt size={28} />,
+      color:
+        "from-orange-500 to-amber-500",
+      vista: "facturas"
+    }
+  ];
 
   return (
+
     <div className="space-y-8">
 
       {/* HERO */}
       <div
         className="
-          relative
-          overflow-hidden
-          rounded-[38px]
           bg-gradient-to-r
-          from-violet-600
-          via-blue-600
-          to-cyan-500
+          from-[#081028]
+          to-[#132b63]
+          rounded-[36px]
           p-10
           text-white
           shadow-2xl
+          relative
+          overflow-hidden
         "
       >
 
-        {/* Glow */}
-        <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-white/10 blur-3xl rounded-full" />
-
-        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-10">
-
-          {/* LEFT */}
-          <div>
-
-            <p className="uppercase tracking-[6px] text-sm text-white/70">
-              Smart Pharmacy Dashboard
-            </p>
-
-            <h1 className="text-6xl font-bold mt-6 tracking-tight">
-              DrogueriaRogil
-            </h1>
-
-            <p className="mt-5 text-white/80 max-w-2xl text-lg leading-relaxed">
-              Plataforma moderna para administración farmacéutica,
-              inventario inteligente, ventas y facturación.
-            </p>
-
-            {/* STATUS */}
-            <div className="flex items-center gap-4 mt-10">
-
-              <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 flex items-center gap-4">
-
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <ShieldCheck size={24} />
-                </div>
-
-                <div>
-
-                  <p className="text-sm text-white/70">
-                    Estado sistema
-                  </p>
-
-                  <p className="font-semibold text-lg">
-                    Operativo
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 flex items-center gap-4">
-
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <Clock3 size={24} />
-                </div>
-
-                <div>
-
-                  <p className="text-sm text-white/70">
-                    Última actividad
-                  </p>
-
-                  <p className="font-semibold text-lg">
-                    Hace 2 min
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        <StatCard
-          titulo="Productos"
-          valor={estadisticas.productos}
-          icono={<Package size={26} className="text-blue-700" />}
-          color="bg-blue-100"
-        />
-
-        <StatCard
-          titulo="Lotes"
-          valor={estadisticas.lotes}
-          icono={<Boxes size={26} className="text-violet-700" />}
-          color="bg-violet-100"
-        />
-
-        <StatCard
-          titulo="Ventas"
-          valor={estadisticas.ventas}
-          icono={<ShoppingCart size={26} className="text-green-700" />}
-          color="bg-green-100"
-        />
-
-        <StatCard
-          titulo="Stock bajo"
-          valor={estadisticas.stockBajo}
-          icono={<AlertTriangle size={26} className="text-orange-700" />}
-          color="bg-orange-100"
-        />
-
-      </div>
-
-      {/* MODULES */}
-      <div>
-
-        <div className="flex items-center justify-between mb-6">
-
-          <div>
-
-            <h2 className="text-3xl font-bold text-slate-900">
-              Módulos
-            </h2>
-
-            <p className="text-slate-400 mt-2">
-              Administración principal del sistema
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-          <ActionCard
-            titulo="Productos"
-            descripcion="Gestión del catálogo farmacéutico."
-            icono={<Package size={28} className="text-blue-700" />}
-            color="bg-blue-100"
-            onClick={() => setVista("productos")}
-          />
-
-          <ActionCard
-            titulo="Lotes"
-            descripcion="Control de inventario y vencimientos."
-            icono={<Boxes size={28} className="text-violet-700" />}
-            color="bg-violet-100"
-            onClick={() => setVista("lotes")}
-          />
-
-          <ActionCard
-            titulo="Ventas"
-            descripcion="Punto de venta farmacéutico."
-            icono={<ShoppingCart size={28} className="text-green-700" />}
-            color="bg-green-100"
-            onClick={() => setVista("ventas")}
-          />
-
-          <ActionCard
-            titulo="Facturas"
-            descripcion="Facturación y control administrativo."
-            icono={<Receipt size={28} className="text-orange-700" />}
-            color="bg-orange-100"
-            onClick={() => setVista("facturas")}
-          />
-
-        </div>
-      </div>
-
-      {/* LOWER */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-        {/* ACTIVITY */}
-        <div className="xl:col-span-2 bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
-
-          <div className="flex items-center justify-between mb-8">
-
-            <div>
-
-              <h2 className="text-2xl font-bold text-slate-900">
-                Actividad reciente
-              </h2>
-
-              <p className="text-sm text-slate-400 mt-2">
-                Últimos movimientos registrados
-              </p>
-
-            </div>
-
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-              <Activity size={24} className="text-slate-700" />
-            </div>
-
-          </div>
-
-          <div className="space-y-4">
-
-            {[
-              "Nueva venta registrada",
-              "Inventario actualizado",
-              "Factura procesada",
-              "Lote agregado correctamente"
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="
-                  flex
-                  items-center
-                  justify-between
-                  bg-slate-50
-                  rounded-2xl
-                  px-5
-                  py-4
-                  hover:bg-slate-100
-                  transition-all
-                "
-              >
-
-                <div className="flex items-center gap-4">
-
-                  <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center">
-                    ✨
-                  </div>
-
-                  <div>
-
-                    <p className="font-medium text-slate-800">
-                      {item}
-                    </p>
-
-                    <p className="text-sm text-slate-400 mt-1">
-                      Hace unos minutos
-                    </p>
-
-                  </div>
-
-                </div>
-
-                <ArrowRight
-                  size={18}
-                  className="text-slate-300"
-                />
-
-              </div>
-            ))}
-
-          </div>
-        </div>
-
-        {/* ALERTS */}
-        <div className="bg-white rounded-[32px] border border-gray-100 p-7 shadow-sm">
-
-          <h2 className="text-2xl font-bold text-slate-900">
-            Alertas
-          </h2>
-
-          <p className="text-sm text-slate-400 mt-2">
-            Estado general del sistema
+        <div className="relative z-10">
+
+          <h1 className="text-5xl font-bold leading-tight">
+            Bienvenido a
+            <br />
+            DrogueriaRogil
+          </h1>
+
+          <p className="text-white/70 mt-5 text-lg max-w-2xl">
+            Sistema administrativo farmacéutico
+            para el control de inventario,
+            ventas, lotes y facturación.
           </p>
 
-          <div className="space-y-5 mt-8">
+        </div>
 
-            <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6">
+        {/* DECORACION */}
+        <div
+          className="
+            absolute
+            w-96
+            h-96
+            rounded-full
+            bg-violet-500/20
+            -top-20
+            -right-20
+            blur-3xl
+          "
+        />
 
-              <p className="text-sm text-orange-500">
-                Productos con stock bajo
+      </div>
+
+      {/* CARDS */}
+      <div
+        className="
+          grid
+          grid-cols-1
+          md:grid-cols-2
+          xl:grid-cols-4
+          gap-6
+        "
+      >
+
+        {tarjetas.map(
+          (tarjeta) => (
+
+            <button
+              key={tarjeta.titulo}
+              onClick={() =>
+                setVista(
+                  tarjeta.vista
+                )
+              }
+              className="
+                bg-white
+                rounded-[30px]
+                border
+                border-gray-100
+                shadow-sm
+                p-7
+                text-left
+                hover:shadow-xl
+                hover:-translate-y-1
+                transition-all
+              "
+            >
+
+              <div
+                className={`
+                  w-16
+                  h-16
+                  rounded-3xl
+                  bg-gradient-to-r
+                  ${tarjeta.color}
+                  text-white
+                  flex
+                  items-center
+                  justify-center
+                  shadow-lg
+                `}
+              >
+
+                {tarjeta.icono}
+
+              </div>
+
+              <h2 className="text-slate-500 text-sm mt-6">
+                {tarjeta.titulo}
+              </h2>
+
+              <p className="text-4xl font-bold text-slate-900 mt-2">
+                {tarjeta.total}
               </p>
 
-              <h3 className="text-5xl font-bold text-orange-600 mt-4">
-                {estadisticas.stockBajo}
-              </h3>
+            </button>
+          )
+        )}
 
-            </div>
+      </div>
 
-            <div className="bg-blue-50 border border-blue-100 rounded-3xl p-6">
+      {/* PRODUCTOS RECIENTES */}
+      <div
+        className="
+          bg-white
+          rounded-[32px]
+          border
+          border-gray-100
+          shadow-sm
+          overflow-hidden
+        "
+      >
 
-              <p className="text-sm text-blue-500">
-                Productos registrados
-              </p>
+        <div className="p-7 border-b border-gray-100">
 
-              <h3 className="text-5xl font-bold text-blue-600 mt-4">
-                {estadisticas.productos}
-              </h3>
+          <h2 className="text-2xl font-bold text-slate-900">
+            Productos recientes
+          </h2>
 
-            </div>
-
-          </div>
+          <p className="text-slate-400 mt-2">
+            Últimos productos registrados.
+          </p>
 
         </div>
+
+        <div className="overflow-x-auto">
+
+          <table className="w-full">
+
+            <thead className="bg-slate-50">
+
+              <tr>
+
+                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+                  Código
+                </th>
+
+                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+                  Nombre
+                </th>
+
+                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+                  Descripción
+                </th>
+
+                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+                  Precio
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {productos
+                .slice(0, 5)
+                .map((producto) => (
+
+                  <tr
+                    key={
+                      producto.idProducto ||
+                      producto.id
+                    }
+                    className="
+                      border-t
+                      border-gray-100
+                      hover:bg-slate-50
+                    "
+                  >
+
+                    <td className="px-6 py-6 font-semibold text-slate-700">
+
+                      {
+                        producto.idProducto ||
+                        producto.id
+                      }
+
+                    </td>
+
+                    <td className="px-6 py-6 text-slate-700">
+
+                      {
+                        producto.nombre || "-"
+                      }
+
+                    </td>
+
+                    <td className="px-6 py-6 text-slate-500">
+
+                      {
+                        producto.descripcion || "-"
+                      }
+
+                    </td>
+
+                    <td className="px-6 py-6 font-bold text-slate-900">
+
+                      Q
+                      {Number(
+                        producto.precio || 0
+                      ).toFixed(2)}
+
+                    </td>
+
+                  </tr>
+                ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
       </div>
 
     </div>

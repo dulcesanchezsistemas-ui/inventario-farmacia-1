@@ -37,7 +37,11 @@ function Facturas({ setVista }) {
 
       const data = await res.json();
 
-      setFacturas(data);
+      setFacturas(
+  Array.isArray(data)
+    ? data
+    : data.facturas || []
+);
     } catch (error) {
       console.error(error);
 
@@ -540,8 +544,9 @@ function Facturas({ setVista }) {
                 (factura) => (
                   <tr
                     key={
-                      factura.idFactura
-                    }
+  factura.idFactura ||
+  factura.id
+}
                     className="
                       border-t
                       border-gray-100
@@ -552,9 +557,11 @@ function Facturas({ setVista }) {
 
                     <td className="px-6 py-5 font-medium text-slate-700">
                       #
-                      {
-                        factura.idFactura
-                      }
+                      #
+{
+  factura.idFactura ||
+  factura.id
+}
                     </td>
 
                     <td className="px-6 py-5 text-slate-700">
@@ -589,8 +596,9 @@ function Facturas({ setVista }) {
                         <button
                           onClick={() =>
                             visualizarFactura(
-                              factura.idFactura
-                            )
+  factura.idFactura ||
+  factura.id
+)
                           }
                           className="
                             px-5
@@ -633,8 +641,9 @@ function Facturas({ setVista }) {
                           <button
                             onClick={() =>
                               anularFactura(
-                                factura.idFactura
-                              )
+  factura.idFactura ||
+  factura.id
+)
                             }
                             className="
                               px-5
@@ -879,12 +888,13 @@ function Facturas({ setVista }) {
 
                       <h2 className="text-4xl font-black text-violet-700 mt-2">
                         #
-                        {
-                          facturaDetalle
-                            .factura
-                            ?.idFactura ||
-                            facturaDetalle.idFactura
-                        }
+                       {
+  facturaDetalle
+    .factura
+    ?.idFactura ||
+    facturaDetalle.idFactura ||
+    facturaDetalle.id
+}
                       </h2>
 
                       <p className="text-slate-400 mt-4">
