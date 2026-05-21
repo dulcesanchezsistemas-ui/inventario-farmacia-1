@@ -224,7 +224,250 @@ function Dashboard({ setVista }) {
         />
 
       </div>
+{/* ALERTAS DEL SISTEMA */}
 
+<div
+  className="
+    bg-white
+    rounded-[32px]
+    border
+    border-gray-100
+    shadow-sm
+    p-7
+  "
+>
+
+  <div className="flex items-center justify-between mb-6">
+
+    <div>
+
+      <h2 className="text-2xl font-bold text-slate-900">
+        Alertas del sistema
+      </h2>
+
+      <p className="text-slate-400 mt-2">
+        Información importante del inventario.
+      </p>
+
+    </div>
+
+    <div className="
+      px-4
+      py-2
+      rounded-2xl
+      bg-red-50
+      text-red-600
+      text-sm
+      font-semibold
+    ">
+      {
+        lotes.filter((l) => {
+          if (!l.fechaVencimiento)
+            return false;
+
+          return (
+            new Date(
+              l.fechaVencimiento
+            ) < new Date()
+          );
+        }).length
+      } vencidos
+    </div>
+
+  </div>
+
+  <div className="
+    grid
+    grid-cols-1
+    md:grid-cols-3
+    gap-6
+  ">
+
+    {/* PROXIMOS A VENCER */}
+    <div className="
+      rounded-[28px]
+      bg-yellow-50
+      border
+      border-yellow-100
+      p-6
+    ">
+
+      <div
+  className="
+    w-16
+    h-16
+    rounded-3xl
+    bg-gradient-to-r
+    from-yellow-400
+    to-orange-400
+    flex
+    items-center
+    justify-center
+    text-white
+    text-2xl
+    shadow-lg
+  "
+>
+  ⏳
+</div>
+
+      <h2 className="
+        text-4xl
+        font-black
+        text-yellow-600
+        mt-4
+      ">
+        {
+          lotes.filter((l) => {
+
+            if (!l.fechaVencimiento)
+              return false;
+
+            const hoy =
+              new Date();
+
+            const vencimiento =
+              new Date(
+                l.fechaVencimiento
+              );
+
+            const diferencia =
+              (vencimiento - hoy) /
+              (1000 * 60 * 60 * 24);
+
+            return (
+              diferencia > 0 &&
+              diferencia <= 30
+            );
+
+          }).length
+        }
+      </h2>
+
+      <p className="
+        text-slate-500
+        mt-3
+        font-medium
+      ">
+        Lotes próximos a vencer
+      </p>
+
+    </div>
+
+    {/* VENCIDOS */}
+    <div className="
+      rounded-[28px]
+      bg-red-50
+      border
+      border-red-100
+      p-6
+    ">
+
+      <div
+  className="
+    w-16
+    h-16
+    rounded-3xl
+    bg-gradient-to-r
+    from-red-500
+    to-rose-500
+    flex
+    items-center
+    justify-center
+    text-white
+    text-2xl
+    shadow-lg
+  "
+>
+  🚨
+</div>
+
+      <h2 className="
+        text-4xl
+        font-black
+        text-red-600
+        mt-4
+      ">
+        {
+          lotes.filter((l) => {
+
+            if (!l.fechaVencimiento)
+              return false;
+
+            return (
+              new Date(
+                l.fechaVencimiento
+              ) < new Date()
+            );
+
+          }).length
+        }
+      </h2>
+
+      <p className="
+        text-slate-500
+        mt-3
+        font-medium
+      ">
+        Lotes vencidos
+      </p>
+
+    </div>
+
+    {/* STOCK BAJO */}
+    <div className="
+      rounded-[28px]
+      bg-orange-50
+      border
+      border-orange-100
+      p-6
+    ">
+<div
+  className="
+    w-16
+    h-16
+    rounded-3xl
+    bg-gradient-to-r
+    from-orange-400
+    to-amber-500
+    flex
+    items-center
+    justify-center
+    text-white
+    text-2xl
+    shadow-lg
+  "
+>
+  ⚠️
+</div>
+
+      <h2 className="
+        text-4xl
+        font-black
+        text-orange-500
+        mt-4
+      ">
+        {
+          lotes.filter(
+            (l) =>
+              Number(l.cantidad) <= 5
+          ).length
+        }
+      </h2>
+
+      <p className="
+        text-slate-500
+        mt-3
+        font-medium
+      ">
+        Stock bajo
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
       {/* CARDS */}
       <div
         className="
