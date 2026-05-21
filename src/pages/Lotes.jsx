@@ -341,6 +341,131 @@ const cargarProductos = async () => {
   return (
 
     <div className="space-y-8">
+      {/* ALERTAS */}
+
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
+  {/* TOTAL LOTES */}
+  <div className="
+    bg-white
+    rounded-[30px]
+    border
+    border-gray-100
+    p-6
+    shadow-sm
+  ">
+    <p className="text-sm text-slate-400">
+      Total lotes
+    </p>
+
+    <h2 className="text-4xl font-bold text-violet-600 mt-4">
+      {lotes.length}
+    </h2>
+
+    <p className="text-slate-400 mt-3">
+      Lotes registrados
+    </p>
+  </div>
+
+  {/* POR VENCER */}
+  <div className="
+    bg-white
+    rounded-[30px]
+    border
+    border-yellow-100
+    p-6
+    shadow-sm
+  ">
+    <p className="text-sm text-yellow-500">
+      Próximos a vencer
+    </p>
+
+    <h2 className="text-4xl font-bold text-yellow-500 mt-4">
+      {
+        lotes.filter((l) => {
+          if (!l.fechaVencimiento) return false;
+
+          const hoy = new Date();
+
+          const vencimiento =
+            new Date(l.fechaVencimiento);
+
+          const diferencia =
+            (vencimiento - hoy) /
+            (1000 * 60 * 60 * 24);
+
+          return diferencia > 0 &&
+            diferencia <= 30;
+        }).length
+      }
+    </h2>
+
+    <p className="text-slate-400 mt-3">
+      Menos de 30 días
+    </p>
+  </div>
+
+  {/* VENCIDOS */}
+  <div className="
+    bg-white
+    rounded-[30px]
+    border
+    border-red-100
+    p-6
+    shadow-sm
+  ">
+    <p className="text-sm text-red-500">
+      Lotes vencidos
+    </p>
+
+    <h2 className="text-4xl font-bold text-red-500 mt-4">
+      {
+        lotes.filter((l) => {
+          if (!l.fechaVencimiento)
+            return false;
+
+          return (
+            new Date(
+              l.fechaVencimiento
+            ) < new Date()
+          );
+        }).length
+      }
+    </h2>
+
+    <p className="text-slate-400 mt-3">
+      Revisar inventario
+    </p>
+  </div>
+
+  {/* STOCK BAJO */}
+  <div className="
+    bg-white
+    rounded-[30px]
+    border
+    border-orange-100
+    p-6
+    shadow-sm
+  ">
+    <p className="text-sm text-orange-500">
+      Stock bajo
+    </p>
+
+    <h2 className="text-4xl font-bold text-orange-500 mt-4">
+      {
+        lotes.filter(
+          (l) =>
+            Number(l.cantidad) <= 5
+        ).length
+      }
+    </h2>
+
+    <p className="text-slate-400 mt-3">
+      Cantidad menor o igual a 5
+    </p>
+  </div>
+
+</div>
 
       {/* HEADER */}
       <div className="flex items-center justify-between">
