@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+
 import {
   ArrowLeft,
   Plus,
@@ -15,6 +16,8 @@ function Lotes({ setVista }) {
 
   const [lotes, setLotes] =
     useState([]);
+  const [productos, setProductos] =
+    useState([]);
 
   const [busqueda, setBusqueda] =
     useState("");
@@ -26,18 +29,24 @@ function Lotes({ setVista }) {
     useState(false);
 
   const [loteActual, setLoteActual] =
-    useState({
-      idLote: "",
-      idProducto: "",
-      cantidad: ""
-    });
+  useState({
+    idLote: "",
+    idProducto: "",
+    cantidad: "",
+    fechaIngreso: "",
+    fechaVencimiento: ""
+  });
 
   // =========================
   // CARGAR LOTES
   // =========================
   useEffect(() => {
-    cargarLotes();
-  }, []);
+
+  cargarLotes();
+
+  cargarProductos();
+
+}, []);
 
   const cargarLotes = async () => {
 
@@ -70,7 +79,33 @@ function Lotes({ setVista }) {
       );
     }
   };
+const cargarProductos = async () => {
 
+  try {
+
+    const res = await fetch(
+      `${API_URL}/productos`
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Error al cargar productos"
+      );
+    }
+
+    const data = await res.json();
+
+    setProductos(
+      Array.isArray(data)
+        ? data
+        : data.productos || []
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
+};
   // =========================
   // NUEVO LOTE
   // =========================
@@ -79,10 +114,15 @@ function Lotes({ setVista }) {
     setModoEdicion(false);
 
     setLoteActual({
-      idLote: "",
-      idProducto: "",
-      cantidad: ""
-    });
+  idLote: "",
+  idProducto: "",
+  cantidad: "",
+  fechaIngreso:
+    new Date()
+      .toISOString()
+      .split("T")[0],
+  fechaVencimiento: ""
+});
 
     setMostrarModal(true);
   };
@@ -189,17 +229,23 @@ function Lotes({ setVista }) {
 
             body: JSON.stringify({
 
-              idLote:
-                loteActual.idLote,
+  idLote:
+    loteActual.idLote,
 
-              idProducto:
-                loteActual.idProducto,
+  idProducto:
+    loteActual.idProducto,
 
-              cantidad: Number(
-                loteActual.cantidad
-              )
+  cantidad: Number(
+    loteActual.cantidad
+  ),
 
-            })
+  fechaIngreso:
+    loteActual.fechaIngreso,
+
+  fechaVencimiento:
+    loteActual.fechaVencimiento
+
+})
           }
         );
 
@@ -446,6 +492,17 @@ function Lotes({ setVista }) {
                 <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
                   Producto
                 </th>
+                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+  Fecha ingreso
+</th>
+
+<th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+  Fecha vencimiento
+</th>
+
+<th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+  Estado
+</th>
 
                 <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
                   Cantidad
@@ -482,6 +539,33 @@ function Lotes({ setVista }) {
                     <td className="px-6 py-6 text-slate-700">
                       {lote.idProducto}
                     </td>
+                    <td className="px-6 py-6 text-slate-700">
+  {lote.fechaIngreso}
+</td>
+
+<td className="px-6 py-6 text-slate-700">
+  {lote.fechaVencimiento}
+</td>
+
+<td className="px-6 py-6">
+
+  {new Date(
+    lote.fechaVencimiento
+  ) < new Date() ? (
+
+    <span className="text-red-600 font-semibold">
+      Vencido
+    </span>
+
+  ) : (
+
+    <span className="text-green-600 font-semibold">
+      Vigente
+    </span>
+
+  )}
+
+</td>
 
                     <td className="px-6 py-6 font-bold text-slate-900">
                       {lote.cantidad}
@@ -658,35 +742,90 @@ function Lotes({ setVista }) {
 
                 <div>
 
-                  <label className="block text-sm font-semibold text-slate-600 mb-3">
-                    ID Producto
-                  </label>
+  <label className="block text-sm font-semibold text-slate-600 mb-3">
+    Producto
+  </label>
 
-                  <input
-                    type="text"
-                    required
-                    value={
-                      loteActual.idProducto
-                    }
-                    onChange={(e) =>
-                      setLoteActual({
-                        ...loteActual,
-                        idProducto:
-                          e.target.value
-                      })
-                    }
-                    className="
-                      w-full
-                      h-14
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      px-5
-                    "
-                  />
+  <select
+    required
+    value={
+      loteActual.idProducto
+    }
+    onChange={(e) =>
+      setLoteActual({
+        ...loteActual,
+        idProducto:
+          e.target.value
+      })
+    }
+    className="
+      w-full
+      h-14
+      rounded-2xl
+      border
+      border-gray-200
+      px-5
+    "
+  >
 
-                </div>
+    <option value="">
+      Seleccionar producto
+    </option>
+
+    {productos.map((producto) => (
+
+      <option
+        key={
+          producto.idProducto ||
+          producto.id
+        }
+        value={
+          producto.idProducto ||
+          producto.id
+        }
+      >
+
+        {producto.nombre}
+
+      </option>
+
+    ))}
+
+  </select>
+
+</div>
               )}
+<div>
+
+  <label className="block text-sm font-semibold text-slate-600 mb-3">
+    Fecha vencimiento
+  </label>
+
+  <input
+    type="date"
+    required
+    value={
+      loteActual.fechaVencimiento
+    }
+    onChange={(e) =>
+      setLoteActual({
+        ...loteActual,
+        fechaVencimiento:
+          e.target.value
+      })
+    }
+    className="
+      w-full
+      h-14
+      rounded-2xl
+      border
+      border-gray-200
+      px-5
+    "
+  />
+
+</div>
+
 
               <div>
 
