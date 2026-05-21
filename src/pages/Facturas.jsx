@@ -135,7 +135,7 @@ function Facturas({ setVista }) {
         facturas.reduce(
           (acc, item) =>
             acc +
-            Number(item.total || 0),
+            Number(item.totalPagar || 0),
           0
         ),
 
@@ -557,16 +557,16 @@ function Facturas({ setVista }) {
 
                     <td className="px-6 py-5 font-medium text-slate-700">
                       #
-                      #
+                      
 {
-  factura.idFactura ||
+  factura.noFactura ||
   factura.id
 }
                     </td>
 
                     <td className="px-6 py-5 text-slate-700">
                       {
-                        factura.nombre
+                        factura.nombreCliente
                       }
                     </td>
 
@@ -577,7 +577,7 @@ function Facturas({ setVista }) {
                     <td className="px-6 py-5 font-semibold text-slate-900">
                       Q
                       {Number(
-                        factura.total
+                        factura.totalPagar
                       ).toFixed(2)}
                     </td>
 
@@ -809,7 +809,7 @@ function Facturas({ setVista }) {
                             facturaDetalle
                               .factura
                               ?.nombre ||
-                              facturaDetalle.nombre ||
+                              facturaDetalle.nombreCliente ||
                               "Consumidor Final"
                           }
                         </span>
@@ -891,8 +891,8 @@ function Facturas({ setVista }) {
                        {
   facturaDetalle
     .factura
-    ?.idFactura ||
-    facturaDetalle.idFactura ||
+    ?.noFactura ||
+    facturaDetalle.noFactura ||
     facturaDetalle.id
 }
                       </h2>
@@ -1053,8 +1053,8 @@ function Facturas({ setVista }) {
                           {Number(
                             facturaDetalle
                               .factura
-                              ?.total ||
-                              facturaDetalle.total ||
+                              ?.totalPagar ||
+                              facturaDetalle.totalPagar ||
                               0
                           ).toFixed(2)}
                         </p>
@@ -1098,8 +1098,8 @@ function Facturas({ setVista }) {
                         {Number(
                           facturaDetalle
                             .factura
-                            ?.total ||
-                            facturaDetalle.total ||
+                            ?.totalPagar ||
+                            facturaDetalle.totalPagar ||
                             0
                         ).toFixed(2)}
                       </h2>
