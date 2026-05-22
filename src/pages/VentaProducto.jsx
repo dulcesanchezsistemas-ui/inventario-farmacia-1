@@ -165,15 +165,26 @@ setProductos(
 
     try {
       const body = {
-        nombre: cliente.nombre,
-        direccion: cliente.direccion,
-        nit: cliente.nit,
-        total: total,
-        productos: carrito.map((item) => ({
-          idProducto: item.idProducto,
-          cantidad: Number(item.cantidad)
-        }))
-      };
+  nombre: cliente.nombre,
+
+  direccion: cliente.direccion,
+
+  nit: cliente.nit,
+
+  total: total,
+
+  metodoPago:
+    metodoPago === "Efectivo"
+      ? "EFECTIVO"
+      : metodoPago === "Tarjeta"
+      ? "TARJETA CREDITO/DEBITO"
+      : "TRANSFERENCIA",
+
+  productos: carrito.map((item) => ({
+    idProducto: item.idProducto,
+    cantidad: Number(item.cantidad)
+  }))
+};
 
       const res = await fetch(
         `${API_URL}/facturas`,

@@ -832,6 +832,22 @@ function Facturas({ setVista }) {
                         </span>
 
                       </div>
+                      <div className="flex gap-4">
+
+  <span className="font-bold text-slate-700">
+    Método pago:
+  </span>
+
+  <span className="text-slate-600">
+    {
+      facturaDetalle
+        .factura?.metodoPago ||
+      facturaDetalle.metodoPago ||
+      "EFECTIVO"
+    }
+  </span>
+
+</div>
 
                     </div>
 
