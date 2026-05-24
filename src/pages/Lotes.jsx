@@ -341,420 +341,805 @@ const cargarProductos = async () => {
   return (
 
     <div className="space-y-8">
-      {/* ALERTAS */}
+      {/* RESUMEN SUPERIOR */}
 
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-  {/* TOTAL LOTES */}
-  <div className="
-    bg-white
-    rounded-[30px]
+<div
+  className="
+    bg-[#ffffff]
     border
-    border-gray-100
+    border-[#e8eefc]
+    rounded-[28px]
     p-6
-    shadow-sm
-  ">
-    <p className="text-sm text-slate-400">
-      Total lotes
-    </p>
+    shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+  "
+>
 
-    <h2 className="text-4xl font-bold text-violet-600 mt-4">
-      {lotes.length}
-    </h2>
-
-    <p className="text-slate-400 mt-3">
-      Lotes registrados
-    </p>
-  </div>
-
-  {/* POR VENCER */}
   <div className="
-    bg-white
-    rounded-[30px]
-    border
-    border-yellow-100
-    p-6
-    shadow-sm
+    flex
+    flex-col
+    xl:flex-row
+    xl:items-center
+    xl:justify-between
+    gap-6
   ">
-    <p className="text-sm text-yellow-500">
-      Próximos a vencer
-    </p>
 
-    <h2 className="text-4xl font-bold text-yellow-500 mt-4">
-      {
-        lotes.filter((l) => {
-          if (!l.fechaVencimiento) return false;
+    {/* LEFT */}
+    <div>
 
-          const hoy = new Date();
+      <h1 className="
+        text-3xl
+        font-black
+        text-slate-900
+      ">
+        Gestión de lotes
+      </h1>
 
-          const vencimiento =
-            new Date(l.fechaVencimiento);
+      <p className="
+        text-slate-500
+        mt-2
+      ">
+        Controla vencimientos,
+        stock y productos registrados.
+      </p>
 
-          const diferencia =
-            (vencimiento - hoy) /
-            (1000 * 60 * 60 * 24);
+    </div>
 
-          return diferencia > 0 &&
-            diferencia <= 30;
-        }).length
-      }
-    </h2>
+    {/* RIGHT */}
+    <div className="
+      flex
+      items-center
+      gap-4
+      flex-wrap
+    ">
 
-    <p className="text-slate-400 mt-3">
-      Menos de 30 días
-    </p>
-  </div>
+      {/* TOTAL */}
+      <div className="
+        bg-[#f7fafc]
+        border
+        border-[#e8eefc]
+        rounded-3xl
+        px-5
+        py-4
+        min-w-[150px]
+      ">
 
-  {/* VENCIDOS */}
-  <div className="
-    bg-white
-    rounded-[30px]
-    border
-    border-red-100
-    p-6
-    shadow-sm
-  ">
-    <p className="text-sm text-red-500">
-      Lotes vencidos
-    </p>
+        <p className="
+          text-sm
+          text-slate-400
+        ">
+          Total lotes
+        </p>
 
-    <h2 className="text-4xl font-bold text-red-500 mt-4">
-      {
-        lotes.filter((l) => {
-          if (!l.fechaVencimiento)
-            return false;
+        <h2 className="
+          text-2xl
+          font-black
+          text-emerald-600
+          mt-1
+        ">
+          {lotes.length}
+        </h2>
 
-          return (
-            new Date(
-              l.fechaVencimiento
-            ) < new Date()
-          );
-        }).length
-      }
-    </h2>
+      </div>
 
-    <p className="text-slate-400 mt-3">
-      Revisar inventario
-    </p>
-  </div>
+      {/* VENCIDOS */}
+      <div className="
+        bg-[#fff1f2]
+        border
+        border-[#ffe4e6]
+        rounded-3xl
+        px-5
+        py-4
+        min-w-[150px]
+      ">
 
-  {/* STOCK BAJO */}
-  <div className="
-    bg-white
-    rounded-[30px]
-    border
-    border-orange-100
-    p-6
-    shadow-sm
-  ">
-    <p className="text-sm text-orange-500">
-      Stock bajo
-    </p>
+        <p className="
+          text-sm
+          text-red-400
+        ">
+          Vencidos
+        </p>
 
-    <h2 className="text-4xl font-bold text-orange-500 mt-4">
-      {
-        lotes.filter(
-          (l) =>
-            Number(l.cantidad) <= 5
-        ).length
-      }
-    </h2>
+        <h2 className="
+          text-2xl
+          font-black
+          text-red-500
+          mt-1
+        ">
+          {
+            lotes.filter((l) => {
 
-    <p className="text-slate-400 mt-3">
-      Cantidad menor o igual a 5
-    </p>
+              if (!l.fechaVencimiento)
+                return false;
+
+              return (
+                new Date(
+                  l.fechaVencimiento
+                ) < new Date()
+              );
+
+            }).length
+          }
+        </h2>
+
+      </div>
+
+      {/* STOCK */}
+      <div className="
+        bg-[#fff7ed]
+        border
+        border-[#ffedd5]
+        rounded-3xl
+        px-5
+        py-4
+        min-w-[150px]
+      ">
+
+        <p className="
+          text-sm
+          text-orange-400
+        ">
+          Stock bajo
+        </p>
+
+        <h2 className="
+          text-2xl
+          font-black
+          text-orange-500
+          mt-1
+        ">
+          {
+            lotes.filter(
+              (l) =>
+                Number(l.cantidad) <= 5
+            ).length
+          }
+        </h2>
+
+      </div>
+
+    </div>
+
   </div>
 
 </div>
 
       {/* HEADER */}
-      <div className="flex items-center justify-between">
 
-        <div className="flex items-center gap-4">
+<div
+  className="
+    flex
+    flex-col
+    xl:flex-row
+    xl:items-center
+    xl:justify-between
+    gap-6
+  "
+>
 
-          <button
-            onClick={() =>
-              setVista("dashboard")
-            }
-            className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-white
-              border
-              border-gray-100
-              shadow-sm
-              flex
-              items-center
-              justify-center
-            "
-          >
-            <ArrowLeft
-              size={20}
-              className="text-slate-700"
-            />
-          </button>
+  {/* LEFT */}
+  <div className="flex items-center gap-4">
 
-          <div>
+    <button
+      onClick={() =>
+        setVista("dashboard")
+      }
+      className="
+        w-14
+        h-14
+        rounded-3xl
+        bg-[#ffffff]
+        border
+        border-[#e8eefc]
+        shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+        flex
+        items-center
+        justify-center
+        hover:scale-105
+        transition-all
+      "
+    >
 
-            <h1 className="text-4xl font-bold text-slate-900">
-              Lotes
-            </h1>
+      <ArrowLeft
+        size={22}
+        className="text-slate-700"
+      />
 
-            <p className="text-slate-400 mt-2">
-              Gestión de inventario
-            </p>
+    </button>
 
-          </div>
+    <div>
 
-        </div>
+      <h1 className="
+        text-4xl
+        font-black
+        text-slate-900
+      ">
+        Lotes
+      </h1>
 
-        <button
-          onClick={
-            abrirNuevoLote
+      <p className="
+        text-slate-400
+        mt-2
+      ">
+        Administración de inventario farmacéutico
+      </p>
+
+    </div>
+
+  </div>
+
+  {/* RIGHT */}
+  <button
+    onClick={
+      abrirNuevoLote
+    }
+    className="
+      h-14
+      px-7
+      rounded-3xl
+      bg-gradient-to-r
+      from-emerald-500
+      to-cyan-500
+      text-white
+      font-semibold
+      flex
+      items-center
+      justify-center
+      gap-3
+      shadow-lg
+      hover:scale-[1.02]
+      transition-all
+    "
+  >
+
+    <Plus size={20} />
+
+    Registrar lote
+
+  </button>
+
+</div>
+
+     {/* GRID PRINCIPAL */}
+
+<div className="
+  grid
+  grid-cols-1
+  xl:grid-cols-3
+  gap-6
+">
+
+  {/* REGISTRAR LOTE */}
+  <div
+    className="
+      bg-[#ffffff]
+      rounded-[28px]
+      border
+      border-[#e8eefc]
+      p-7
+      shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+    "
+  >
+
+    <div className="mb-8">
+
+      <h2 className="
+        text-2xl
+        font-black
+        text-slate-900
+      ">
+        Registrar lote
+      </h2>
+
+      <p className="
+        text-slate-400
+        mt-2
+      ">
+        Agrega existencias por producto.
+      </p>
+
+    </div>
+
+    <form
+      onSubmit={guardarLote}
+      className="space-y-5"
+    >
+
+      {/* ID */}
+      <div>
+
+        <label className="
+          text-sm
+          font-semibold
+          text-slate-500
+          block
+          mb-3
+        ">
+          Código de lote
+        </label>
+
+        <input
+          type="text"
+          required
+          value={loteActual.idLote}
+          onChange={(e) =>
+            setLoteActual({
+              ...loteActual,
+              idLote: e.target.value
+            })
           }
+          placeholder="Ej. LOT001"
           className="
-            px-6
+            w-full
             h-14
             rounded-2xl
-            bg-gradient-to-r
-            from-violet-600
-            to-blue-600
-            text-white
-            font-semibold
-            flex
-            items-center
-            gap-3
-            shadow-lg
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            px-5
+            outline-none
+            focus:ring-2
+            focus:ring-emerald-400
+          "
+        />
+
+      </div>
+
+      {/* PRODUCTO */}
+      <div>
+
+        <label className="
+          text-sm
+          font-semibold
+          text-slate-500
+          block
+          mb-3
+        ">
+          Producto
+        </label>
+
+        <select
+          required
+          value={loteActual.idProducto}
+          onChange={(e) =>
+            setLoteActual({
+              ...loteActual,
+              idProducto:
+                e.target.value
+            })
+          }
+          className="
+            w-full
+            h-14
+            rounded-2xl
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            px-5
+            outline-none
           "
         >
 
-          <Plus size={20} />
+          <option value="">
+            Selecciona producto
+          </option>
 
-          Nuevo lote
+          {productos.map((producto) => (
 
+            <option
+              key={
+                producto.idProducto ||
+                producto.id
+              }
+              value={
+                producto.idProducto ||
+                producto.id
+              }
+            >
+
+              {producto.nombre}
+
+            </option>
+
+          ))}
+
+        </select>
+
+      </div>
+
+      {/* CANTIDAD */}
+      <div>
+
+        <label className="
+          text-sm
+          font-semibold
+          text-slate-500
+          block
+          mb-3
+        ">
+          Cantidad
+        </label>
+
+        <input
+          type="number"
+          required
+          value={loteActual.cantidad}
+          onChange={(e) =>
+            setLoteActual({
+              ...loteActual,
+              cantidad:
+                e.target.value
+            })
+          }
+          placeholder="Cantidad disponible"
+          className="
+            w-full
+            h-14
+            rounded-2xl
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            px-5
+            outline-none
+            focus:ring-2
+            focus:ring-emerald-400
+          "
+        />
+
+      </div>
+
+      {/* FECHA */}
+      <div>
+
+        <label className="
+          text-sm
+          font-semibold
+          text-slate-500
+          block
+          mb-3
+        ">
+          Fecha de vencimiento
+        </label>
+
+        <input
+          type="date"
+          required
+          value={
+            loteActual.fechaVencimiento
+          }
+          onChange={(e) =>
+            setLoteActual({
+              ...loteActual,
+              fechaVencimiento:
+                e.target.value
+            })
+          }
+          className="
+            w-full
+            h-14
+            rounded-2xl
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            px-5
+            outline-none
+            focus:ring-2
+            focus:ring-emerald-400
+          "
+        />
+
+      </div>
+
+      {/* BOTONES */}
+      <div className="
+        flex
+        items-center
+        gap-4
+        pt-4
+      ">
+
+        <button
+          type="submit"
+          className="
+            h-14
+            px-6
+            rounded-2xl
+            bg-gradient-to-r
+            from-emerald-500
+            to-cyan-500
+            text-white
+            font-semibold
+            shadow-lg
+          "
+        >
+          Agregar lote
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            setLoteActual({
+              idLote: "",
+              idProducto: "",
+              cantidad: "",
+              fechaIngreso: "",
+              fechaVencimiento: ""
+            })
+          }
+          className="
+            h-14
+            px-6
+            rounded-2xl
+            bg-slate-100
+            text-slate-600
+            font-semibold
+          "
+        >
+          Limpiar
         </button>
 
       </div>
 
-      {/* SEARCH */}
-      <div
-        className="
-          bg-white
-          rounded-[32px]
-          border
-          border-gray-100
-          p-6
-          shadow-sm
-        "
-      >
+    </form>
 
-        <div className="relative">
+  </div>
 
-          <Search
-            size={18}
-            className="
-              absolute
-              left-4
-              top-1/2
-              -translate-y-1/2
-              text-slate-400
-            "
-          />
+  {/* TABLA */}
+  <div
+    className="
+      xl:col-span-2
+      bg-[#ffffff]
+      rounded-[28px]
+      border
+      border-[#e8eefc]
+      shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+      overflow-hidden
+    "
+  >
 
-          <input
-            type="text"
-            placeholder="Buscar lote..."
-            value={busqueda}
-            onChange={(e) =>
-              setBusqueda(
-                e.target.value
-              )
-            }
-            className="
-              w-full
-              h-14
-              rounded-2xl
-              border
-              border-gray-100
-              bg-slate-50
-              pl-12
-              pr-5
-              outline-none
-              focus:ring-2
-              focus:ring-violet-500
-            "
-          />
+    {/* HEADER */}
+    <div className="
+      p-6
+      border-b
+      border-[#eef2ff]
+      flex
+      items-center
+      justify-between
+      gap-4
+      flex-wrap
+    ">
 
-        </div>
+      <div>
+
+        <h2 className="
+          text-2xl
+          font-black
+          text-slate-900
+        ">
+          Lista de lotes
+        </h2>
+
+        <p className="
+          text-slate-400
+          mt-2
+        ">
+          Lotes registrados en la base de datos.
+        </p>
 
       </div>
 
-      {/* TABLA */}
-      <div
-        className="
-          bg-white
-          rounded-[32px]
-          border
-          border-gray-100
-          shadow-sm
-          overflow-hidden
-        "
-      >
+      {/* SEARCH */}
+      <div className="
+        relative
+        w-full
+        xl:w-[320px]
+      ">
 
-        <div className="overflow-x-auto">
+        <Search
+          size={18}
+          className="
+            absolute
+            left-4
+            top-1/2
+            -translate-y-1/2
+            text-slate-400
+          "
+        />
 
-          <table className="w-full">
+        <input
+          type="text"
+          placeholder="Buscar lote o producto..."
+          value={busqueda}
+          onChange={(e) =>
+            setBusqueda(
+              e.target.value
+            )
+          }
+          className="
+            w-full
+            h-12
+            rounded-2xl
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            pl-12
+            pr-5
+            outline-none
+          "
+        />
 
-            <thead className="bg-slate-50">
+      </div>
 
-              <tr>
+    </div>
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  ID Lote
-                </th>
+    {/* TABLA */}
+    <div className="overflow-x-auto">
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Producto
-                </th>
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-  Fecha ingreso
-</th>
+      <table className="w-full">
 
-<th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-  Fecha vencimiento
-</th>
+        <thead className="bg-[#f7fafc]">
 
-<th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-  Estado
-</th>
+          <tr>
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Cantidad
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-400">
+              Lote
+            </th>
 
-                <th className="px-6 py-5 text-center text-sm font-semibold text-slate-500">
-                  Acciones
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-400">
+              Producto
+            </th>
 
-              </tr>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-400">
+              Cantidad
+            </th>
 
-            </thead>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-400">
+              Vencimiento
+            </th>
 
-            <tbody>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-400">
+              Estado
+            </th>
 
-              {lotesFiltrados.map(
-                (lote) => (
+            <th className="px-6 py-5 text-center text-sm font-semibold text-slate-400">
+              Acciones
+            </th>
 
-                  <tr
-                    key={
-                      lote.idLote
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {lotesFiltrados.map((lote) => (
+
+            <tr
+              key={lote.idLote}
+              className="
+                border-t
+                border-[#eef2ff]
+                hover:bg-[#f8fbff]
+                transition-all
+              "
+            >
+
+              <td className="px-6 py-5 font-semibold text-cyan-600">
+                {lote.idLote}
+              </td>
+
+              <td className="px-6 py-5 text-slate-700">
+                {lote.idProducto}
+              </td>
+
+              <td className="px-6 py-5 font-semibold text-slate-700">
+                {lote.cantidad}
+              </td>
+
+              <td className="px-6 py-5 text-slate-500">
+                {lote.fechaVencimiento}
+              </td>
+
+              <td className="px-6 py-5">
+
+                {new Date(
+                  lote.fechaVencimiento
+                ) < new Date() ? (
+
+                  <span className="
+                    px-4
+                    py-2
+                    rounded-2xl
+                    bg-[#fff1f2]
+                    text-red-500
+                    text-sm
+                    font-semibold
+                  ">
+                    Vencido
+                  </span>
+
+                ) : (
+
+                  <span className="
+                    px-4
+                    py-2
+                    rounded-2xl
+                    bg-[#ecfdf5]
+                    text-emerald-600
+                    text-sm
+                    font-semibold
+                  ">
+                    Vigente
+                  </span>
+
+                )}
+
+              </td>
+
+              <td className="px-6 py-5">
+
+                <div className="
+                  flex
+                  items-center
+                  justify-center
+                  gap-3
+                ">
+
+                  <button
+                    onClick={() =>
+                      abrirEditarLote(
+                        lote
+                      )
                     }
                     className="
-                      border-t
-                      border-gray-100
-                      hover:bg-slate-50
+                      w-11
+                      h-11
+                      rounded-2xl
+                      bg-[#ecfeff]
+                      text-cyan-600
+                      flex
+                      items-center
+                      justify-center
                     "
                   >
+                    <Pencil size={18} />
+                  </button>
 
-                    <td className="px-6 py-6 font-semibold text-slate-700">
-                      {lote.idLote}
-                    </td>
+                  <button
+                    onClick={() =>
+                      eliminarLote(
+                        lote.idLote
+                      )
+                    }
+                    className="
+                      w-11
+                      h-11
+                      rounded-2xl
+                      bg-[#fff1f2]
+                      text-rose-500
+                      flex
+                      items-center
+                      justify-center
+                    "
+                  >
+                    <Trash2 size={18} />
+                  </button>
 
-                    <td className="px-6 py-6 text-slate-700">
-                      {lote.idProducto}
-                    </td>
-                    <td className="px-6 py-6 text-slate-700">
-  {lote.fechaIngreso}
-</td>
+                </div>
 
-<td className="px-6 py-6 text-slate-700">
-  {lote.fechaVencimiento}
-</td>
+              </td>
 
-<td className="px-6 py-6">
+            </tr>
 
-  {new Date(
-    lote.fechaVencimiento
-  ) < new Date() ? (
+          ))}
 
-    <span className="text-red-600 font-semibold">
-      Vencido
-    </span>
+        </tbody>
 
-  ) : (
+      </table>
 
-    <span className="text-green-600 font-semibold">
-      Vigente
-    </span>
+    </div>
 
-  )}
+  </div>
 
-</td>
-
-                    <td className="px-6 py-6 font-bold text-slate-900">
-                      {lote.cantidad}
-                    </td>
-
-                    <td className="px-6 py-6">
-
-                      <div className="flex items-center justify-center gap-3">
-
-                        <button
-                          onClick={() =>
-                            abrirEditarLote(
-                              lote
-                            )
-                          }
-                          className="
-                            w-12
-                            h-12
-                            rounded-2xl
-                            bg-blue-100
-                            text-blue-700
-                            flex
-                            items-center
-                            justify-center
-                          "
-                        >
-                          <Pencil size={18} />
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            eliminarLote(
-                              lote.idLote
-                            )
-                          }
-                          className="
-                            w-12
-                            h-12
-                            rounded-2xl
-                            bg-red-100
-                            text-red-700
-                            flex
-                            items-center
-                            justify-center
-                          "
-                        >
-                          <Trash2 size={18} />
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
+</div>
 
       {/* MODAL */}
       {mostrarModal && (

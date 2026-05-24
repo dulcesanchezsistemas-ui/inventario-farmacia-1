@@ -144,278 +144,194 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] flex">
+    <div className="min-h-screen bg-[#f8fafc]">
 
-      {/* SIDEBAR */}
-      <aside
-        className="
-          w-[260px]
-          bg-gradient-to-b
-          from-[#081028]
-          via-[#0b1739]
-          to-[#111c44]
-          text-white
+      
+
+      {/* CONTENT */}
+      <main className="px-8 py-6 max-w-[1700px] mx-auto">
+
+        {/* TOPBAR */}
+<div className="flex items-center justify-between mb-10">
+
+  {/* LOGO + MENU */}
+  <div className="flex items-center gap-5">
+
+    <div
+      className="
+        w-16
+        h-16
+        rounded-3xl
+        bg-gradient-to-br
+       from-emerald-500
+to-teal-500
+        flex
+        items-center
+        justify-center
+        shadow-xl
+      "
+    >
+      <Package size={30} className="text-white" />
+    </div>
+
+    <div>
+
+      <h1 className="text-4xl font-black text-slate-900">
+        DrogueriaRogil
+      </h1>
+
+      <p className="text-slate-400 mt-1">
+        Sistema administrativo farmacéutico
+      </p>
+
+    </div>
+
+  </div>
+
+  {/* MENU HORIZONTAL */}
+  <div className="flex items-center gap-3">
+
+    {menus.map((menu) => (
+      <button
+        key={menu.nombre}
+        onClick={() =>
+          setVista(menu.vista)
+        }
+        className={`
           flex
-          flex-col
-          justify-between
+          items-center
+          gap-3
           px-5
-          py-6
+          h-12
+          rounded-xl
+          transition-all
+          font-medium
+          ${
+            vista === menu.vista
+              ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg"
+              : "bg-white border border-gray-100 text-slate-600 hover:shadow-md"
+          }
+        `}
+      >
+
+        {menu.icono}
+
+        {menu.nombre}
+
+      </button>
+    ))}
+
+  </div>
+
+  {/* NOTIFICACIONES */}
+  <div className="relative">
+
+    <button
+      onClick={() =>
+        setMostrarNotificaciones(
+          !mostrarNotificaciones
+        )
+      }
+      className="
+        relative
+        w-14
+        h-12
+        rounded-xl
+        bg-white
+        border
+        border-gray-100
+        shadow-sm
+        flex
+        items-center
+        justify-center
+        hover:shadow-lg
+        transition-all
+      "
+    >
+
+      <Bell
+        size={22}
+        className="text-slate-700"
+      />
+
+      {notificaciones.length > 0 && (
+        <div
+          className="
+            absolute
+            top-2
+            right-2
+            w-3
+            h-3
+            bg-red-500
+            rounded-full
+          "
+        />
+      )}
+
+    </button>
+
+    {mostrarNotificaciones && (
+      <div
+        className="
+          absolute
+          top-16
+          right-0
+          w-[340px]
+          bg-white
+          rounded-3xl
           shadow-2xl
-          relative
-          overflow-hidden
+          border
+          border-gray-100
+          p-5
+          z-50
         "
       >
 
-        {/* GLOW */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-violet-500/10 blur-3xl rounded-full" />
+        <h3 className="text-xl font-bold text-slate-900 mb-5">
+          Notificaciones
+        </h3>
 
-        <div className="relative z-10">
+        {notificaciones.length === 0 ? (
 
-          {/* LOGO */}
-          <div className="mb-12">
+          <p className="text-slate-400">
+            No hay alertas
+          </p>
 
-            <div
-              className="
-                w-16
-                h-16
-                rounded-3xl
-                bg-gradient-to-br
-                from-violet-500
-                to-blue-500
-                flex
-                items-center
-                justify-center
-                shadow-2xl
-              "
-            >
-              <Package size={30} />
-            </div>
+        ) : (
 
-            <h1 className="text-3xl font-bold mt-5 tracking-tight">
-              DrogueriaRogil
-            </h1>
-
-
-          </div>
-
-          {/* MENUS */}
           <div className="space-y-3">
 
-            {menus.map((menu) => (
-              <button
-                key={menu.nombre}
-                onClick={() =>
-                  setVista(menu.vista)
-                }
-                className={`
-                  w-full
-                  flex
-                  items-center
-                  gap-4
-                  px-5
-                  py-4
-                  rounded-2xl
-                  transition-all
-                  duration-300
-                  text-left
-                  group
-                  ${
-                    vista === menu.vista
-                      ? "bg-gradient-to-r from-violet-600 to-blue-600 shadow-xl"
-                      : "hover:bg-white/5 text-slate-300"
-                  }
-                `}
-              >
+            {notificaciones.map(
+              (noti, index) => (
 
                 <div
-                  className={`
-                    transition-all
-                    ${
-                      vista === menu.vista
-                        ? "scale-110"
-                        : "group-hover:scale-110"
-                    }
-                  `}
-                >
-                  {menu.icono}
-                </div>
-
-                <span className="font-medium">
-                  {menu.nombre}
-                </span>
-
-              </button>
-            ))}
-
-          </div>
-
-        </div>
-
-        {/* STATUS */}
-        <div
-          className="
-            relative
-            z-10
-            bg-white/5
-            border
-            border-white/10
-            rounded-3xl
-            p-5
-            backdrop-blur-xl
-          "
-        >
-
-          <div className="flex items-center gap-3">
-
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
-
-            <div>
-
-              <p className="font-medium">
-                Sistema operativo
-              </p>
-
-              <p className="text-sm text-slate-400 mt-1">
-                Todos los módulos activos
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </aside>
-
-      {/* CONTENT */}
-      <main className="flex-1 px-8 py-6 overflow-auto">
-
-        {/* TOPBAR */}
-        <div className="flex items-center justify-between mb-10">
-
-          <div>
-
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              Bienvenido
-            </h1>
-
-          </div>
-
-          <div className="flex items-center gap-5 relative">
-
-            {/* NOTIFICATIONS */}
-            <button
-              onClick={() =>
-                setMostrarNotificaciones(
-                  !mostrarNotificaciones
-                )
-              }
-              className="
-                relative
-                w-12
-                h-12
-                rounded-2xl
-                bg-white
-                shadow-sm
-                border
-                border-gray-100
-                flex
-                items-center
-                justify-center
-                hover:shadow-lg
-                transition-all
-              "
-            >
-
-              <Bell
-                size={20}
-                className="text-slate-700"
-              />
-
-              {notificaciones.length >
-                0 && (
-                <div
+                  key={index}
                   className="
-                    absolute
-                    top-2
-                    right-2
-                    w-2
-                    h-2
-                    bg-violet-500
-                    rounded-full
+                    bg-slate-50
+                    rounded-xl
+                    p-4
+                    border
+                    border-gray-100
                   "
-                />
-              )}
+                >
 
-            </button>
-
-            {/* DROPDOWN */}
-            {mostrarNotificaciones && (
-              <div
-                className="
-                  absolute
-                  top-16
-                  right-0
-                  w-[340px]
-                  bg-white
-                  rounded-3xl
-                  shadow-2xl
-                  border
-                  border-gray-100
-                  p-5
-                  z-50
-                "
-              >
-
-                <h3 className="text-xl font-bold text-slate-900 mb-5">
-                  Notificaciones
-                </h3>
-
-                {notificaciones.length ===
-                0 ? (
-                  <p className="text-slate-400">
-                    No hay alertas
+                  <p className="text-sm text-slate-700">
+                    {noti.mensaje}
                   </p>
-                ) : (
-                  <div className="space-y-3">
 
-                    {notificaciones.map(
-                      (
-                        noti,
-                        index
-                      ) => (
-                        <div
-                          key={index}
-                          className="
-                            bg-slate-50
-                            rounded-2xl
-                            p-4
-                            border
-                            border-gray-100
-                          "
-                        >
-
-                          <p className="text-sm text-slate-700">
-                            {
-                              noti.mensaje
-                            }
-                          </p>
-
-                        </div>
-                      )
-                    )}
-
-                  </div>
-                )}
-
-              </div>
+                </div>
+              )
             )}
 
-            
-
           </div>
+        )}
 
-        </div>
+      </div>
+    )}
+
+  </div>
+
+</div>
 
         {/* PAGE */}
         {renderVista()}

@@ -4,7 +4,10 @@ import {
   Package,
   Boxes,
   ShoppingCart,
-  Receipt
+  Receipt,
+  Hourglass,
+  Siren,
+  TriangleAlert
 } from "lucide-react";
 
 const API_URL = "http://localhost:3000";
@@ -140,7 +143,7 @@ function Dashboard({ setVista }) {
       total: productos.length,
       icono: <Package size={28} />,
       color:
-        "from-violet-600 to-purple-600",
+        "from-emerald-500 to-teal-500",
       vista: "productos"
     },
 
@@ -149,7 +152,7 @@ function Dashboard({ setVista }) {
       total: lotes.length,
       icono: <Boxes size={28} />,
       color:
-        "from-blue-600 to-cyan-600",
+        "from-sky-500 to-cyan-500",
       vista: "lotes"
     },
 
@@ -159,7 +162,7 @@ function Dashboard({ setVista }) {
       icono:
         <ShoppingCart size={28} />,
       color:
-        "from-emerald-600 to-green-600",
+        "from-teal-500 to-emerald-500",
       vista: "ventas"
     },
 
@@ -169,7 +172,7 @@ function Dashboard({ setVista }) {
       icono:
         <Receipt size={28} />,
       color:
-        "from-orange-500 to-amber-500",
+        "from-violet-500 to-purple-500",
       vista: "facturas"
     }
   ];
@@ -178,62 +181,132 @@ function Dashboard({ setVista }) {
 
     <div className="space-y-8">
 
-      {/* HERO */}
+      {/* HEADER DASHBOARD */}
+<div
+  className="
+   bg-[#ffffff]
+    rounded-[32px]
+    border
+    border-[#e8eefc]
+    p-8
+    shadow-sm
+  "
+>
+
+  <div className="
+    flex
+    flex-col
+    xl:flex-row
+    xl:items-center
+    xl:justify-between
+    gap-6
+  ">
+
+    {/* LEFT */}
+    <div>
+
+      <h1 className="
+        text-4xl
+font-bold
+        text-slate-900
+      ">
+        ¡Bienvenido! 
+      </h1>
+
+      <p className="
+        text-slate-500
+        mt-3
+        text-lg
+      ">
+        Aquí tienes el resumen general
+        de tu farmacia.
+      </p>
+
+    </div>
+
+    {/* RIGHT */}
+    <div className="
+      flex
+      items-center
+      gap-4
+      flex-wrap
+    ">
+
       <div
         className="
-          bg-gradient-to-r
-          from-[#081028]
-          to-[#132b63]
-          rounded-[36px]
-          p-10
-          text-white
-          shadow-2xl
-          relative
-          overflow-hidden
+          bg-[#f7fafc]
+          border
+          border-[#e8eefc]
+          rounded-3xl
+          px-6
+          py-4
+          min-w-[180px]
         "
       >
 
-        <div className="relative z-10">
+        <p className="
+          text-sm
+          text-slate-400
+        ">
+          Fecha actual
+        </p>
 
-          <h1 className="text-5xl font-bold leading-tight">
-            Bienvenido a
-            <br />
-            DrogueriaRogil
-          </h1>
-
-          <p className="text-white/70 mt-5 text-lg max-w-2xl">
-            Sistema administrativo farmacéutico
-            para el control de inventario,
-            ventas, lotes y facturación.
-          </p>
-
-        </div>
-
-        {/* DECORACION */}
-        <div
-          className="
-            absolute
-            w-96
-            h-96
-            rounded-full
-            bg-violet-500/20
-            -top-20
-            -right-20
-            blur-3xl
-          "
-        />
+        <h3 className="
+          text-lg
+          font-bold
+          text-slate-900
+          mt-1
+        ">
+          {new Date().toLocaleDateString()}
+        </h3>
 
       </div>
+
+      <div
+        className="
+          bg-[#f7fafc]
+          border
+          border-[#e8eefc]
+          rounded-3xl
+          px-6
+          py-4
+          min-w-[180px]
+        "
+      >
+
+        <p className="
+          text-sm
+          text-slate-400
+        ">
+          Hora actual
+        </p>
+
+        <h3 className="
+          text-lg
+          font-bold
+          text-slate-900
+          mt-1
+        ">
+          {new Date().toLocaleTimeString()}
+        </h3>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 {/* ALERTAS DEL SISTEMA */}
 
 <div
   className="
-    bg-white
+   bg-[#ffffff]
     rounded-[32px]
     border
-    border-gray-100
+   border-[#e8eefc]
     shadow-sm
-    p-7
+    p-6
   "
 >
 
@@ -255,7 +328,7 @@ function Dashboard({ setVista }) {
       px-4
       py-2
       rounded-2xl
-      bg-red-50
+     bg-[#fffafa]
       text-red-600
       text-sm
       font-semibold
@@ -285,34 +358,35 @@ function Dashboard({ setVista }) {
 
     {/* PROXIMOS A VENCER */}
     <div className="
-      rounded-[28px]
-      bg-yellow-50
+      rounded-[34px]
+     bg-[#fffdf7]
       border
       border-yellow-100
       p-6
     ">
 
-      <div
+     <div
   className="
-    w-16
-    h-16
-    rounded-3xl
-    bg-gradient-to-r
-    from-yellow-400
-    to-orange-400
+    w-20
+    h-20
+    rounded-[34px]
+    bg-white
+    border
+    border-[#f8e7b5]
     flex
     items-center
     justify-center
-    text-white
-    text-2xl
-    shadow-lg
+    shadow-[0_10px_40px_rgba(15,23,42,0.04)]
   "
 >
-  ⏳
+  <Hourglass
+  size={42}
+  className="text-yellow-500"
+/>
 </div>
 
       <h2 className="
-        text-4xl
+        text-3xl
         font-black
         text-yellow-600
         mt-4
@@ -347,7 +421,7 @@ function Dashboard({ setVista }) {
       <p className="
         text-slate-500
         mt-3
-        font-medium
+        font-semibold tracking-tight
       ">
         Lotes próximos a vencer
       </p>
@@ -356,8 +430,8 @@ function Dashboard({ setVista }) {
 
     {/* VENCIDOS */}
     <div className="
-      rounded-[28px]
-      bg-red-50
+      rounded-[34px]
+     bg-[#fffafa]
       border
       border-red-100
       p-6
@@ -365,25 +439,26 @@ function Dashboard({ setVista }) {
 
       <div
   className="
-    w-16
-    h-16
-    rounded-3xl
-    bg-gradient-to-r
-    from-red-500
-    to-rose-500
+    w-20
+    h-20
+    rounded-[34px]
+    bg-white
+    border
+    border-[#ffd9df]
     flex
     items-center
     justify-center
-    text-white
-    text-2xl
-    shadow-lg
+    shadow-[0_10px_40px_rgba(15,23,42,0.04)]
   "
 >
-  🚨
+  <Siren
+  size={42}
+  className="text-rose-500"
+/>
 </div>
 
       <h2 className="
-        text-4xl
+        text-3xl
         font-black
         text-red-600
         mt-4
@@ -407,7 +482,7 @@ function Dashboard({ setVista }) {
       <p className="
         text-slate-500
         mt-3
-        font-medium
+        font-semibold tracking-tight
       ">
         Lotes vencidos
       </p>
@@ -416,33 +491,34 @@ function Dashboard({ setVista }) {
 
     {/* STOCK BAJO */}
     <div className="
-      rounded-[28px]
-      bg-orange-50
+      rounded-[34px]
+     bg-[#fffaf5]
       border
       border-orange-100
       p-6
     ">
 <div
   className="
-    w-16
-    h-16
-    rounded-3xl
-    bg-gradient-to-r
-    from-orange-400
-    to-amber-500
+    w-20
+    h-20
+    rounded-[34px]
+    bg-white
+    border
+    border-[#ffe1bf]
     flex
     items-center
     justify-center
-    text-white
-    text-2xl
-    shadow-lg
+    shadow-[0_10px_40px_rgba(15,23,42,0.04)]
   "
 >
-  ⚠️
+  <TriangleAlert
+  size={42}
+  className="text-orange-500"
+/>
 </div>
 
       <h2 className="
-        text-4xl
+        text-3xl
         font-black
         text-orange-500
         mt-4
@@ -458,7 +534,7 @@ function Dashboard({ setVista }) {
       <p className="
         text-slate-500
         mt-3
-        font-medium
+        font-semibold tracking-tight
       ">
         Stock bajo
       </p>
@@ -490,15 +566,15 @@ function Dashboard({ setVista }) {
                 )
               }
               className="
-                bg-white
-                rounded-[30px]
+               bg-[#ffffff]
+                rounded-[24px]
                 border
-                border-gray-100
+               border-[#e8eefc]
                 shadow-sm
-                p-7
+                p-6
                 text-left
                 hover:shadow-xl
-                hover:-translate-y-1
+                hover:-translate-y-1 hover:scale-[1.02] 
                 transition-all
               "
             >
@@ -526,7 +602,7 @@ function Dashboard({ setVista }) {
                 {tarjeta.titulo}
               </h2>
 
-              <p className="text-4xl font-bold text-slate-900 mt-2">
+              <p className="text-3xl font-bold text-slate-900 mt-2">
                 {tarjeta.total}
               </p>
 
@@ -536,120 +612,297 @@ function Dashboard({ setVista }) {
 
       </div>
 
-      {/* PRODUCTOS RECIENTES */}
-      <div
-        className="
-          bg-white
-          rounded-[32px]
-          border
-          border-gray-100
-          shadow-sm
-          overflow-hidden
-        "
-      >
+      {/* GRID DASHBOARD */}
+<div className="
+  grid
+  grid-cols-1
+  xl:grid-cols-3
+  gap-6
+">
 
-        <div className="p-7 border-b border-gray-100">
+  {/* VENTAS */}
+  <div
+    className="
+      xl:col-span-2
+      bg-[#ffffff]
+      rounded-[34px]
+      border
+      border-[#e8eefc]
+      p-7
+      shadow-sm
+    "
+  >
 
-          <h2 className="text-2xl font-bold text-slate-900">
-            Productos recientes
-          </h2>
+    <div className="
+      flex
+      items-center
+      justify-between
+      mb-8
+    ">
 
-          <p className="text-slate-400 mt-2">
-            Últimos productos registrados.
-          </p>
+      <div>
 
-        </div>
+        <h2 className="
+          text-2xl
+          font-bold
+          text-slate-900
+        ">
+          Ventas últimos 7 días
+        </h2>
 
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead className="bg-slate-50">
-
-              <tr>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Código
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Nombre
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Descripción
-                </th>
-
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Precio
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {productos
-                .slice(0, 5)
-                .map((producto) => (
-
-                  <tr
-                    key={
-                      producto.idProducto ||
-                      producto.id
-                    }
-                    className="
-                      border-t
-                      border-gray-100
-                      hover:bg-slate-50
-                    "
-                  >
-
-                    <td className="px-6 py-6 font-semibold text-slate-700">
-
-                      {
-                        producto.idProducto ||
-                        producto.id
-                      }
-
-                    </td>
-
-                    <td className="px-6 py-6 text-slate-700">
-
-                      {
-                        producto.nombre || "-"
-                      }
-
-                    </td>
-
-                    <td className="px-6 py-6 text-slate-500">
-
-                      {
-                        producto.descripcion || "-"
-                      }
-
-                    </td>
-
-                    <td className="px-6 py-6 font-bold text-slate-900">
-
-                      Q
-                      {Number(
-                        producto.precio || 0
-                      ).toFixed(2)}
-
-                    </td>
-
-                  </tr>
-                ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
+        <p className="
+          text-slate-400
+          mt-2
+        ">
+          Resumen semanal
+        </p>
 
       </div>
+
+      <div
+        className="
+          px-4
+          py-2
+          rounded-2xl
+          bg-emerald-50
+          text-emerald-600
+          text-sm
+          font-semibold
+        "
+      >
+        Últimos 7 días
+      </div>
+
+    </div>
+
+    {/* BARRAS */}
+    <div className="
+      flex
+      items-end
+      justify-between
+      gap-4
+      h-[240px]
+    ">
+
+      {[35, 50, 60, 48, 72, 65, 55].map(
+        (altura, index) => (
+
+          <div
+            key={index}
+            className="
+              flex
+              flex-col
+              items-center
+              flex-1
+            "
+          >
+
+            <div
+              className="
+                w-full
+                rounded-t-3xl
+                bg-gradient-to-t
+                from-emerald-500
+                to-cyan-400
+              "
+              style={{
+                height: `${altura}%`
+              }}
+            />
+
+            <p className="
+              text-xs
+              text-slate-400
+              mt-3
+            ">
+              Día {index + 1}
+            </p>
+
+          </div>
+        )
+      )}
+
+    </div>
+
+  </div>
+
+  {/* LOTES */}
+  <div
+    className="
+      bg-[#ffffff]
+      rounded-[34px]
+      border
+      border-[#e8eefc]
+      p-7
+      shadow-sm
+    "
+  >
+
+    <div className="
+      flex
+      items-center
+      justify-between
+      mb-8
+    ">
+
+      <div>
+
+        <h2 className="
+          text-2xl
+          font-bold
+          text-slate-900
+        ">
+          Próximos a vencer
+        </h2>
+
+        <p className="
+          text-slate-400
+          mt-2
+        ">
+          Lotes críticos
+        </p>
+
+      </div>
+
+    </div>
+
+    <div className="space-y-5">
+
+      {lotes
+        .slice(0, 4)
+        .map((lote, index) => (
+
+          <div
+            key={index}
+            className="
+              flex
+              items-center
+              justify-between
+              border-b
+              border-[#eef2ff]
+              pb-4
+            "
+          >
+
+            <div>
+
+              <h3 className="
+                font-semibold
+                text-slate-800
+              ">
+                {
+                  lote.nombreProducto ||
+                  lote.idProducto
+                }
+              </h3>
+
+              <p className="
+                text-sm
+                text-slate-400
+                mt-1
+              ">
+                Lote {lote.idLote}
+              </p>
+
+            </div>
+
+            <div className="text-right">
+
+              <p className="
+                text-orange-500
+                font-semibold
+                text-sm
+              ">
+                Revisar
+              </p>
+
+            </div>
+
+          </div>
+        ))}
+
+    </div>
+
+  </div>
+
+</div>
+
+{/* ULTIMA FACTURA */}
+<div
+  className="
+    bg-[#ffffff]
+    rounded-[34px]
+    border
+    border-[#e8eefc]
+    p-7
+    shadow-sm
+  "
+>
+
+  <div className="
+    flex
+    items-center
+    justify-between
+  ">
+
+    <div>
+
+      <p className="
+        text-slate-400
+        text-sm
+      ">
+        Última factura generada
+      </p>
+
+      <h2 className="
+        text-2xl
+        font-black
+        text-slate-900
+        mt-2
+      ">
+        {
+          facturas.length > 0
+            ? facturas[
+                facturas.length - 1
+              ].noFactura
+            : "Sin facturas"
+        }
+      </h2>
+
+    </div>
+
+    <div>
+
+      <p className="
+        text-sm
+        text-slate-400
+      ">
+        Total
+      </p>
+
+      <h2 className="
+        text-3xl
+        font-black
+        text-emerald-600
+        mt-2
+      ">
+        Q
+        {
+          facturas.length > 0
+            ? Number(
+                facturas[
+                  facturas.length - 1
+                ].totalPagar || 0
+              ).toFixed(2)
+            : "0.00"
+        }
+      </h2>
+
+    </div>
+
+  </div>
+
+</div>
 
     </div>
   );

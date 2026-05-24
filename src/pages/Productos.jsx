@@ -321,275 +321,604 @@ function Productos({ setVista }) {
     <div className="space-y-8">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+<div className="
+  flex
+  flex-col
+  xl:flex-row
+  xl:items-center
+  xl:justify-between
+  gap-6
+">
 
-        <div className="flex items-center gap-4">
+  {/* TITULO */}
+  <div className="flex items-center gap-4">
 
-          <button
-            onClick={() =>
-              setVista("dashboard")
-            }
-            className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-white
-              border
-              border-gray-100
-              shadow-sm
-              flex
-              items-center
-              justify-center
-            "
-          >
-            <ArrowLeft
-              size={20}
-              className="text-slate-700"
-            />
-          </button>
+    <button
+      onClick={() =>
+        setVista("dashboard")
+      }
+      className="
+        w-14
+        h-14
+        rounded-3xl
+        bg-[#ffffff]
+        border
+        border-[#e8eefc]
+        shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+        flex
+        items-center
+        justify-center
+      "
+    >
+      <ArrowLeft
+        size={22}
+        className="text-slate-700"
+      />
+    </button>
 
-          <div>
+    <div>
 
-            <h1 className="text-4xl font-bold text-slate-900">
-              Productos
-            </h1>
+      <h1 className="
+        text-4xl
+        font-black
+        text-slate-900
+      ">
+        Registrar producto
+      </h1>
 
-            <p className="text-slate-400 mt-2">
-              Gestión farmacéutica
-            </p>
+      <p className="
+        text-slate-400
+        mt-2
+      ">
+        Administración farmacéutica
+      </p>
 
-          </div>
+    </div>
 
-        </div>
+  </div>
 
-        <button
-          onClick={
-            abrirNuevoProducto
-          }
-          className="
-            px-6
-            h-14
-            rounded-2xl
-            bg-gradient-to-r
-            from-violet-600
-            to-blue-600
-            text-white
-            font-semibold
-            flex
-            items-center
-            gap-3
-            shadow-lg
-          "
-        >
+  {/* BOTON */}
+  <button
+    onClick={
+      abrirNuevoProducto
+    }
+    className="
+      h-14
+      px-7
+      rounded-3xl
+      bg-gradient-to-r
+      from-emerald-500
+      to-cyan-500
+      text-white
+      font-semibold
+      flex
+      items-center
+      gap-3
+      shadow-lg
+      hover:scale-[1.02]
+      transition-all
+    "
+  >
 
-          <Plus size={20} />
+    <Plus size={20} />
 
-          Nuevo producto
+    Nuevo producto
 
-        </button>
+  </button>
+
+</div>
+
+     {/* GRID PRINCIPAL */}
+
+<div className="
+  grid
+  grid-cols-1
+  xl:grid-cols-[420px_1fr]
+  gap-6
+">
+
+  <div
+  className="
+    bg-[#ffffff]
+    rounded-[28px]
+    border
+    border-[#e8eefc]
+    p-7
+    shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+    h-fit
+  "
+>
+
+  <div className="mb-7">
+
+    <h2 className="
+      text-3xl
+      font-black
+      text-slate-900
+    ">
+      Registrar producto
+    </h2>
+
+    <p className="
+      text-slate-400
+      mt-2
+    ">
+      Ingresa los datos principales del producto.
+    </p>
+
+  </div>
+
+  <form
+    onSubmit={guardarProducto}
+    className="space-y-5"
+  >
+
+    {/* CODIGO */}
+
+    <div>
+
+      <label className="
+        block
+        text-sm
+        font-semibold
+        text-slate-500
+        mb-3
+      ">
+        Código
+      </label>
+
+      <input
+        type="text"
+        required
+        value={
+          productoActual.idProducto
+        }
+        onChange={(e) =>
+          setProductoActual({
+            ...productoActual,
+            idProducto:
+              e.target.value
+          })
+        }
+        placeholder="Ej. PROD001"
+        className="
+          w-full
+          h-14
+          rounded-3xl
+          border
+          border-[#e8eefc]
+          bg-[#f8fbff]
+          px-5
+          outline-none
+          focus:ring-2
+          focus:ring-emerald-400
+        "
+      />
+
+    </div>
+
+    {/* NOMBRE */}
+
+    <div>
+
+      <label className="
+        block
+        text-sm
+        font-semibold
+        text-slate-500
+        mb-3
+      ">
+        Nombre
+      </label>
+
+      <input
+        type="text"
+        required
+        value={
+          productoActual.nombre
+        }
+        onChange={(e) =>
+          setProductoActual({
+            ...productoActual,
+            nombre:
+              e.target.value
+          })
+        }
+        placeholder="Nombre del producto"
+        className="
+          w-full
+          h-14
+          rounded-3xl
+          border
+          border-[#e8eefc]
+          bg-[#f8fbff]
+          px-5
+          outline-none
+          focus:ring-2
+          focus:ring-emerald-400
+        "
+      />
+
+    </div>
+
+    {/* DESCRIPCION */}
+
+    <div>
+
+      <label className="
+        block
+        text-sm
+        font-semibold
+        text-slate-500
+        mb-3
+      ">
+        Descripción
+      </label>
+
+      <textarea
+        rows={4}
+        required
+        value={
+          productoActual.descripcion
+        }
+        onChange={(e) =>
+          setProductoActual({
+            ...productoActual,
+            descripcion:
+              e.target.value
+          })
+        }
+        placeholder="Descripción o uso del producto"
+        className="
+          w-full
+          rounded-3xl
+          border
+          border-[#e8eefc]
+          bg-[#f8fbff]
+          p-5
+          outline-none
+          focus:ring-2
+          focus:ring-emerald-400
+        "
+      />
+
+    </div>
+
+    {/* PRECIO */}
+
+    <div>
+
+      <label className="
+        block
+        text-sm
+        font-semibold
+        text-slate-500
+        mb-3
+      ">
+        Precio
+      </label>
+
+      <input
+        type="number"
+        required
+        value={
+          productoActual.precio
+        }
+        onChange={(e) =>
+          setProductoActual({
+            ...productoActual,
+            precio:
+              e.target.value
+          })
+        }
+        placeholder="Q0.00"
+        className="
+          w-full
+          h-14
+          rounded-3xl
+          border
+          border-[#e8eefc]
+          bg-[#f8fbff]
+          px-5
+          outline-none
+          focus:ring-2
+          focus:ring-emerald-400
+        "
+      />
+
+    </div>
+
+    {/* BOTONES */}
+
+    <div className="
+      flex
+      items-center
+      gap-4
+      pt-2
+    ">
+
+      <button
+        type="submit"
+        className="
+          h-14
+          px-7
+          rounded-3xl
+          bg-gradient-to-r
+          from-emerald-500
+          to-cyan-500
+          text-white
+          font-semibold
+          shadow-lg
+        "
+      >
+        Agregar producto
+      </button>
+
+      <button
+        type="button"
+        onClick={() =>
+          setProductoActual({
+            idProducto: "",
+            nombre: "",
+            descripcion: "",
+            precio: ""
+          })
+        }
+        className="
+          h-14
+          px-7
+          rounded-3xl
+          bg-[#f1f5f9]
+          text-slate-600
+          font-semibold
+        "
+      >
+        Limpiar
+      </button>
+
+    </div>
+
+  </form>
+
+</div>
+
+ 
+
+  {/* TABLA */}
+
+  <div
+    className="
+      bg-[#ffffff]
+      rounded-[28px]
+      border
+      border-[#e8eefc]
+      shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+      overflow-hidden
+    "
+  >
+
+    {/* HEADER TABLA */}
+
+    <div className="
+      p-7
+      border-b
+      border-[#eef2ff]
+      flex
+      flex-col
+      xl:flex-row
+      xl:items-center
+      xl:justify-between
+      gap-5
+    ">
+
+      <div>
+
+        <h2 className="
+          text-3xl
+          font-black
+          text-slate-900
+        ">
+          Lista de productos
+        </h2>
+
+        <p className="
+          text-slate-400
+          mt-2
+        ">
+          Productos registrados en el sistema
+        </p>
 
       </div>
 
       {/* SEARCH */}
-      <div
-        className="
-          bg-white
-          rounded-[32px]
-          border
-          border-gray-100
-          p-6
-          shadow-sm
-        "
-      >
 
-        <div className="relative">
+      <div className="
+        relative
+        w-full
+        xl:max-w-[380px]
+      ">
 
-          <Search
-            size={18}
-            className="
-              absolute
-              left-4
-              top-1/2
-              -translate-y-1/2
-              text-slate-400
-            "
-          />
+        <Search
+          size={18}
+          className="
+            absolute
+            left-5
+            top-1/2
+            -translate-y-1/2
+            text-slate-400
+          "
+        />
 
-          <input
-            type="text"
-            placeholder="Buscar producto..."
-            value={busqueda}
-            onChange={(e) =>
-              setBusqueda(
-                e.target.value
-              )
-            }
-            className="
-              w-full
-              h-14
-              rounded-2xl
-              border
-              border-gray-100
-              bg-slate-50
-              pl-12
-              pr-5
-              outline-none
-              focus:ring-2
-              focus:ring-violet-500
-            "
-          />
-
-        </div>
+        <input
+          type="text"
+          placeholder="Buscar producto..."
+          value={busqueda}
+          onChange={(e) =>
+            setBusqueda(
+              e.target.value
+            )
+          }
+          className="
+            w-full
+            h-14
+            rounded-3xl
+            bg-[#f7fafc]
+            border
+            border-[#e8eefc]
+            pl-14
+            pr-5
+            outline-none
+            text-slate-700
+            focus:ring-2
+            focus:ring-emerald-400
+            transition-all
+          "
+        />
 
       </div>
 
-      {/* TABLA */}
-      <div
-        className="
-          bg-white
-          rounded-[32px]
-          border
-          border-gray-100
-          shadow-sm
-          overflow-hidden
-        "
-      >
+    </div>
 
-        <div className="overflow-x-auto">
+    {/* TABLA */}
 
-          <table className="w-full">
+    <div className="overflow-x-auto">
 
-            <thead className="bg-slate-50">
+      <table className="w-full">
 
-              <tr>
+        <thead className="bg-[#f7fafc]">
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Código
-                </th>
+          <tr>
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Nombre
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+              Código
+            </th>
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Descripción
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+              Nombre
+            </th>
 
-                <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
-                  Precio
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+              Descripción
+            </th>
 
-                <th className="px-6 py-5 text-center text-sm font-semibold text-slate-500">
-                  Acciones
-                </th>
+            <th className="px-6 py-5 text-left text-sm font-semibold text-slate-500">
+              Precio
+            </th>
+
+            <th className="px-6 py-5 text-center text-sm font-semibold text-slate-500">
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {productosFiltrados.map(
+            (producto) => (
+
+              <tr
+                key={
+                  producto.idProducto ||
+                  producto.id
+                }
+                className="
+                  border-t
+                  border-[#eef2ff]
+                  hover:bg-[#f8fbff]
+                  transition-all
+                "
+              >
+
+                <td className="px-6 py-6 font-semibold text-slate-700">
+                  {
+                    producto.idProducto ||
+                    producto.id
+                  }
+                </td>
+
+                <td className="px-6 py-6 text-slate-700">
+                  {
+                    producto.nombre || "-"
+                  }
+                </td>
+
+                <td className="px-6 py-6 text-slate-500">
+                  {
+                    producto.descripcion || "-"
+                  }
+                </td>
+
+                <td className="px-6 py-6 font-bold text-emerald-600">
+                  Q
+                  {Number(
+                    producto.precio || 0
+                  ).toFixed(2)}
+                </td>
+
+                <td className="px-6 py-6">
+
+                  <div className="flex items-center justify-center gap-3">
+
+                    <button
+                      onClick={() =>
+                        abrirEditarProducto(
+                          producto
+                        )
+                      }
+                      className="
+                        w-12
+                        h-12
+                        rounded-2xl
+                        bg-[#ecfeff]
+                        text-cyan-600
+                        flex
+                        items-center
+                        justify-center
+                      "
+                    >
+                      <Pencil size={18} />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        eliminarProducto(
+                          producto.idProducto ||
+                          producto.id
+                        )
+                      }
+                      className="
+                        w-12
+                        h-12
+                        rounded-2xl
+                        bg-[#fff1f2]
+                        text-rose-500
+                        flex
+                        items-center
+                        justify-center
+                      "
+                    >
+                      <Trash2 size={18} />
+                    </button>
+
+                  </div>
+
+                </td>
 
               </tr>
+            )
+          )}
 
-            </thead>
+        </tbody>
 
-            <tbody>
+      </table>
 
-              {productosFiltrados.map(
-                (producto) => (
+    </div>
 
-                  <tr
-                    key={
-                      producto.idProducto ||
-                      producto.id
-                    }
-                    className="
-                      border-t
-                      border-gray-100
-                      hover:bg-slate-50
-                    "
-                  >
+  </div>
 
-                    <td className="px-6 py-6 font-semibold text-slate-700">
-                      {
-                        producto.idProducto ||
-                        producto.id
-                      }
-                    </td>
-
-                    <td className="px-6 py-6 text-slate-700">
-                      {
-                        producto.nombre || "-"
-                      }
-                    </td>
-
-                    <td className="px-6 py-6 text-slate-500">
-                      {
-                        producto.descripcion || "-"
-                      }
-                    </td>
-
-                    <td className="px-6 py-6 font-bold text-slate-900">
-                      Q
-                      {Number(
-                        producto.precio || 0
-                      ).toFixed(2)}
-                    </td>
-
-                    <td className="px-6 py-6">
-
-                      <div className="flex items-center justify-center gap-3">
-
-                        <button
-                          onClick={() =>
-                            abrirEditarProducto(
-                              producto
-                            )
-                          }
-                          className="
-                            w-12
-                            h-12
-                            rounded-2xl
-                            bg-blue-100
-                            text-blue-700
-                            flex
-                            items-center
-                            justify-center
-                          "
-                        >
-                          <Pencil size={18} />
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            eliminarProducto(
-                              producto.idProducto ||
-                              producto.id
-                            )
-                          }
-                          className="
-                            w-12
-                            h-12
-                            rounded-2xl
-                            bg-red-100
-                            text-red-700
-                            flex
-                            items-center
-                            justify-center
-                          "
-                        >
-                          <Trash2 size={18} />
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
+</div>
 
       {/* MODAL */}
       {mostrarModal && (
@@ -623,8 +952,8 @@ function Productos({ setVista }) {
             <div
               className="
                 bg-gradient-to-r
-                from-violet-600
-                to-blue-600
+               from-emerald-500
+to-cyan-500
                 px-8
                 py-7
                 text-white
@@ -820,8 +1149,8 @@ function Productos({ setVista }) {
                     h-14
                     rounded-2xl
                     bg-gradient-to-r
-                    from-violet-600
-                    to-blue-600
+                   from-emerald-500
+to-cyan-500
                     text-white
                     font-semibold
                     shadow-lg
